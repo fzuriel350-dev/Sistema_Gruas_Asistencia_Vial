@@ -1,0 +1,242 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --geg-yellow: #FFD500;
+    --geg-yellow-dark: #E6A000;
+    --geg-yellow-light: #FFF3B0;
+    --geg-black: #0F0F0F;
+    --geg-success: #059669;
+    --geg-danger: #dc2626;
+    --geg-text-muted: #6b7280;
+    --geg-border: #d1d5db;
+    --geg-border-light: #e5e7eb;
+    --geg-bg: #f0f2f5;
+  }
+}
+
+@layer components {
+  .stat-card {
+    @apply bg-white rounded-xl p-5 shadow-sm flex items-center gap-4 transition-all duration-200;
+  }
+  .stat-card:hover {
+    @apply -translate-y-0.5 shadow-md;
+  }
+  .stat-icon {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0;
+  }
+  .stat-value {
+    @apply text-2xl font-extrabold leading-none tracking-tight mb-0.5;
+  }
+  .stat-label {
+    @apply text-xs text-gray-500 font-medium;
+  }
+  .stat-trend {
+    @apply text-[11px] mt-1.5 font-semibold;
+  }
+  .stat-trend.up { @apply text-emerald-600; }
+  .stat-trend.down { @apply text-red-600; }
+
+  .chart-bar {
+    @apply w-full max-w-[40px] rounded-t-md min-h-[8px] transition-all duration-300 cursor-pointer;
+    background: linear-gradient(180deg, var(--geg-yellow), var(--geg-yellow-dark));
+  }
+  .chart-bar:hover {
+    @apply opacity-85 scale-x-105;
+  }
+
+  .activity-dot {
+    @apply w-2 h-2 rounded-full mt-1 shrink-0;
+  }
+  .activity-dot-active { @apply bg-blue-600; }
+  .activity-dot-success { @apply bg-emerald-600; }
+  .activity-dot-pending { @apply bg-amber-600; }
+  .activity-dot-danger { @apply bg-red-600; }
+
+  .status {
+    @apply inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .status-dot {
+    @apply w-1.5 h-1.5 rounded-full;
+  }
+  .status-pending {
+    @apply bg-amber-50 text-amber-800;
+  }
+  .status-pending .status-dot { @apply bg-amber-600; }
+  .status-active {
+    @apply bg-blue-50 text-blue-800;
+  }
+  .status-active .status-dot { @apply bg-blue-600; }
+  .status-success {
+    @apply bg-emerald-50 text-emerald-800;
+  }
+  .status-success .status-dot { @apply bg-emerald-600; }
+  .status-danger {
+    @apply bg-red-50 text-red-800;
+  }
+  .status-danger .status-dot { @apply bg-red-600; }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm overflow-hidden mb-5;
+  }
+  .card-header {
+    @apply px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3;
+  }
+  .card-header h3 {
+    @apply text-[15px] font-bold;
+  }
+  .card-body {
+    @apply p-5;
+  }
+  .card-body-content {
+    @apply p-0;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer;
+  }
+  .btn-primary {
+    @apply text-black;
+    background: var(--geg-yellow);
+  }
+  .btn-primary:hover {
+    background: var(--geg-yellow-dark);
+    @apply -translate-y-0.5;
+    box-shadow: 0 4px 12px rgba(255, 213, 0, 0.3);
+  }
+  .btn-sm {
+    @apply px-3.5 py-1.5 text-xs;
+  }
+  .btn-ghost {
+    @apply text-white border border-white/15;
+    background: rgba(255,255,255,0.1);
+  }
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.15);
+    @apply -translate-y-0.5;
+  }
+  .btn-secondary {
+    @apply text-gray-700 bg-gray-100 border border-gray-200;
+  }
+  .btn-secondary:hover {
+    @apply bg-gray-200 border-gray-300;
+  }
+  .btn-ghost-btn {
+    @apply text-gray-500 border border-gray-200 bg-transparent;
+  }
+  .btn-ghost-btn:hover {
+    @apply bg-gray-50 border-gray-300 text-gray-700;
+  }
+  .btn-success {
+    @apply bg-emerald-600 text-white;
+  }
+  .btn-success:hover {
+    @apply bg-emerald-700;
+  }
+
+  .form-group {
+    @apply mb-4;
+  }
+  .form-group label {
+    @apply block text-xs font-semibold text-gray-800 mb-1.5;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    @apply w-full px-3.5 py-2.5 rounded-lg text-sm transition-colors duration-200;
+    border: 1.5px solid var(--geg-border);
+    background: #fafafa;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    @apply outline-none bg-white;
+    border-color: var(--geg-yellow);
+    box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.15);
+  }
+
+  .map-placeholder {
+    @apply relative overflow-hidden rounded-lg;
+    background: var(--geg-border-light);
+  }
+  .map-grid {
+    @apply absolute inset-0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .welcome-banner {
+    background: linear-gradient(135deg, var(--geg-black), #1a1a1a);
+  }
+
+  .form-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-x-5;
+  }
+  .form-grid .full-width { @apply sm:col-span-2; }
+
+  .route-card {
+    @apply relative flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200;
+    border: 2px solid var(--geg-border-light);
+  }
+  .route-card:hover {
+    border-color: var(--geg-yellow);
+    @apply bg-yellow-50/30;
+  }
+  .route-card.selected {
+    border-color: var(--geg-yellow);
+    background: linear-gradient(135deg, #FFFEF0, #FFF9C4);
+    box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.2);
+  }
+  .route-title {
+    @apply font-bold text-sm text-gray-900;
+  }
+  .route-meta {
+    @apply flex flex-wrap gap-3 text-xs text-gray-500 mt-1;
+  }
+  .route-price {
+    @apply ml-auto text-lg font-extrabold shrink-0;
+    color: var(--geg-yellow-dark);
+  }
+
+  .cost-summary {
+    @apply space-y-3;
+  }
+  .cost-row {
+    @apply flex items-center justify-between text-sm text-gray-600 py-1;
+  }
+  .cost-row.total {
+    @apply border-t-2 border-gray-200 pt-3 mt-2 text-base font-extrabold text-gray-900;
+  }
+
+  .form-actions {
+    @apply flex items-center justify-end gap-3 pt-2;
+  }
+
+  .table-container {
+    @apply overflow-x-auto;
+  }
+  .table-container table {
+    @apply w-full text-sm;
+  }
+  .table-container thead th {
+    @apply text-left px-4 py-3 text-[11px] uppercase tracking-wider font-bold text-gray-500 bg-gray-50 border-b border-gray-200;
+  }
+  .table-container tbody td {
+    @apply px-4 py-3.5 border-b border-gray-100 text-gray-700;
+  }
+  .table-container tbody tr:last-child td {
+    @apply border-b-0;
+  }
+  .table-container tbody tr:hover {
+    @apply bg-gray-50/60;
+  }
+
+  .nav-active {
+    background: rgba(255, 213, 0, 0.1);
+    border-left: 3px solid var(--geg-yellow);
+  }
+}

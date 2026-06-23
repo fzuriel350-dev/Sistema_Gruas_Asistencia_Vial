@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Operador extends Model
+{
+    use \App\Models\Traits\BelongsToEmpresa;
+
+    protected $table = 'operadores';
+
+    protected $fillable = [
+        'empresa_id',
+        'empleado_id',
+        'licencia_tipo',
+        'licencia_año_vencimiento',
+        'disponible',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'licencia_año_vencimiento' => 'date',
+            'disponible' => 'boolean',
+        ];
+    }
+
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
+    }
+
+    public function empleado()
+    {
+        return $this->belongsTo(Empleado::class);
+    }
+
+    public function unidades()
+    {
+        return $this->hasMany(Unidad::class);
+    }
+
+    public function servicios()
+    {
+        return $this->hasMany(Servicio::class);
+    }
+}
