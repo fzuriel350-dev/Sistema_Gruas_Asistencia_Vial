@@ -22,8 +22,23 @@ npm install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --seed
-php artisan serve
 ```
+
+## Servidores de desarrollo
+
+```bash
+# Servidor web de Laravel
+php artisan serve
+
+# Compilar assets (Tailwind, JS)
+npm run dev
+
+# Ambos al mismo tiempo (requiere dos terminales)
+php artisan serve  # Terminal 1
+npm run dev       # Terminal 2
+```
+
+La aplicación se abrirá en `http://localhost:8000`.
 
 ## Credenciales de acceso
 
