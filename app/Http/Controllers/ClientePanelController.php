@@ -28,17 +28,20 @@ class ClientePanelController extends Controller
         $empresaId = session('empresa_id');
 
         $cotizaciones = Cotizacion::where('empresa_id', $empresaId)
-            ->where('created_by', $user->id);
+            ->where('usuario_creador_id', $user->id);
 
         $pendientes = (clone $cotizaciones)->where('estatus', 'pendiente')->count();
         $aprobadas = (clone $cotizaciones)->where('estatus', 'aprobado')->count();
         $rechazadas = (clone $cotizaciones)->where('estatus', 'rechazado')->count();
 
         $servicios = Servicio::where('empresa_id', $empresaId)
-            ->whereHas('cotizacion', fn($q) => $q->where('created_by', $user->id));
+            ->whereHas('cotizacion', fn($q) => $q->where('usuario_creador_id', $user->id));
 
         $activos = (clone $servicios)->whereIn('estado', Servicio::ESTADOS_ACTIVOS)->count();
         $finalizados = (clone $servicios)->where('estado', 'finalizado')->count();
+        $servicioActivo = (clone $servicios)->whereIn('estado', Servicio::ESTADOS_ACTIVOS)
+            ->with('cotizacion', 'operador.empleado')
+            ->first();
 
         $serviciosPorMes = (clone $servicios)
             ->selectRaw('strftime("%m", created_at) as mes, count(*) as total')
@@ -48,7 +51,7 @@ class ClientePanelController extends Controller
             ->pluck('total', 'mes');
 
         $actividades = Cotizacion::where('empresa_id', $empresaId)
-            ->where('created_by', $user->id)
+            ->where('usuario_creador_id', $user->id)
             ->with('tipoServicio')
             ->latest()
             ->take(5)
@@ -65,7 +68,7 @@ class ClientePanelController extends Controller
 
         return view('clientes.dashboard', compact(
             'pendientes', 'aprobadas', 'rechazadas',
-            'activos', 'finalizados',
+            'activos', 'finalizados', 'servicioActivo',
             'serviciosPorMes', 'actividades'
         ));
     }
@@ -76,7 +79,7 @@ class ClientePanelController extends Controller
         $empresaId = session('empresa_id');
 
         $query = Servicio::where('empresa_id', $empresaId)
-            ->whereHas('cotizacion', fn($q) => $q->where('created_by', $user->id))
+            ->whereHas('cotizacion', fn($q) => $q->where('usuario_creador_id', $user->id))
             ->with('cotizacion.tipoServicio', 'operador.empleado', 'unidad', 'tipoServicio');
 
         if ($request->filled('q')) {
@@ -101,7 +104,7 @@ class ClientePanelController extends Controller
     public function servicioShow(Servicio $servicio)
     {
         $user = auth()->user();
-        if ($servicio->cotizacion->created_by !== $user->id) {
+        if ($servicio->cotizacion->usuario_creador_id !== $user->id) {
             abort(403);
         }
 
@@ -128,7 +131,7 @@ class ClientePanelController extends Controller
     public function cancelarServicio(Request $request, Servicio $servicio)
     {
         $user = auth()->user();
-        if ($servicio->cotizacion->created_by !== $user->id) {
+        if ($servicio->cotizacion->usuario_creador_id !== $user->id) {
             abort(403);
         }
 
@@ -184,7 +187,7 @@ class ClientePanelController extends Controller
     public function aprobarCotizacion(Request $request, Cotizacion $cotizacione)
     {
         $user = auth()->user();
-        if ($cotizacione->created_by !== $user->id || $cotizacione->estatus !== 'pendiente') {
+        if ($cotizacione->usuario_creador_id !== $user->id || $cotizacione->estatus !== 'pendiente') {
             abort(403);
         }
 
@@ -213,7 +216,7 @@ class ClientePanelController extends Controller
     public function rechazarCotizacion(Request $request, Cotizacion $cotizacione)
     {
         $user = auth()->user();
-        if ($cotizacione->created_by !== $user->id || $cotizacione->estatus !== 'pendiente') {
+        if ($cotizacione->usuario_creador_id !== $user->id || $cotizacione->estatus !== 'pendiente') {
             abort(403);
         }
 
@@ -244,7 +247,7 @@ class ClientePanelController extends Controller
         $empresaId = session('empresa_id');
 
         $query = Cotizacion::where('empresa_id', $empresaId)
-            ->where('created_by', $user->id)
+            ->where('usuario_creador_id', $user->id)
             ->with('aseguradora', 'tipoServicio');
 
         if ($request->filled('q')) {

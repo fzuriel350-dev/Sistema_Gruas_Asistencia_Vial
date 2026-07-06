@@ -328,13 +328,127 @@ class DatabaseSeeder extends Seeder
             'updated_at' => now()->subDays(10),
         ]);
 
-        User::create([
+        $clienteUser = User::create([
             'empresa_id' => $empresa->id,
             'empleado_id' => null,
             'name' => 'Juan Pérez',
             'email' => 'cliente@gruas.com',
             'password' => bcrypt('password'),
             'role' => 'cliente',
+        ]);
+
+        // Cotizaciones de prueba para el cliente
+        $cotCliente1 = Cotizacion::create([
+            'empresa_id' => $empresa->id,
+            'cliente_id' => $cliente1->id,
+            'aseguradora_id' => $qualitas->id,
+            'tipo_servicio_id' => $arrastre->id,
+            'folio' => 'COT-0006',
+            'origen_direccion' => 'Av. Insurgentes Sur 123, CDMX',
+            'destino_direccion' => 'Taller Mecánico Express, Calzada Taxqueña 450',
+            'distancia_km' => 15,
+            'tiempo_estimado_minutos' => 35,
+            'costo_banderazo' => 450.00,
+            'costo_km' => 100.00,
+            'km_excedente' => 10,
+            'incluye_peajes' => false,
+            'costo_aprox_casetas' => 0,
+            'costo_total' => 1950.00,
+            'usuario_creador_id' => $clienteUser->id,
+            'estatus' => 'aprobado',
+            'created_at' => now()->subDays(2),
+            'updated_at' => now()->subDay(),
+        ]);
+
+        Cotizacion::create([
+            'empresa_id' => $empresa->id,
+            'cliente_id' => $cliente2->id,
+            'aseguradora_id' => $axa->id,
+            'tipo_servicio_id' => $rescate->id,
+            'folio' => 'COT-0007',
+            'origen_direccion' => 'Periférico Sur 2000, CDMX',
+            'destino_direccion' => 'Autopista México-Cuernavaca Km 35',
+            'distancia_km' => 45,
+            'tiempo_estimado_minutos' => 60,
+            'costo_banderazo' => 500.00,
+            'costo_km' => 90.00,
+            'km_excedente' => 35,
+            'incluye_peajes' => true,
+            'costo_aprox_casetas' => 280.00,
+            'costo_total' => 4530.00,
+            'usuario_creador_id' => $clienteUser->id,
+            'estatus' => 'pendiente',
+            'created_at' => now()->subDay(),
+            'updated_at' => now()->subDay(),
+        ]);
+
+        Cotizacion::create([
+            'empresa_id' => $empresa->id,
+            'cliente_id' => $cliente3->id,
+            'aseguradora_id' => $gnp->id,
+            'tipo_servicio_id' => $auxilio->id,
+            'folio' => 'COT-0008',
+            'origen_direccion' => 'Av. Revolución 800, CDMX',
+            'destino_direccion' => 'Mismo lugar (auxilio vial)',
+            'distancia_km' => 0,
+            'tiempo_estimado_minutos' => 20,
+            'costo_banderazo' => 350.00,
+            'costo_km' => 0,
+            'km_excedente' => 0,
+            'incluye_peajes' => false,
+            'costo_aprox_casetas' => 0,
+            'costo_total' => 350.00,
+            'usuario_creador_id' => $clienteUser->id,
+            'estatus' => 'rechazado',
+            'created_at' => now()->subDays(5),
+            'updated_at' => now()->subDays(4),
+        ]);
+
+        // Servicio de prueba para el cliente (activo)
+        $servCliente = Servicio::create([
+            'empresa_id' => $empresa->id,
+            'cotizacion_id' => $cotCliente1->id,
+            'operador_id' => $operador1->id,
+            'unidad_id' => $unidad1->id,
+            'oficina_id' => $oficina->id,
+            'tipo_servicio_id' => 1,
+            'estado' => 'en_sitio_origen',
+            'fecha_inicio' => now()->setHour(9)->setMinute(0),
+            'kms_salida' => 18450,
+            'kms_llegada_cliente' => 18465,
+            'observaciones' => 'Operador en sitio, realizando carga del vehículo',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \App\Models\Notificacion::create([
+            'empresa_id' => $empresa->id,
+            'usuario_id' => $clienteUser->id,
+            'mensaje' => 'Tu servicio #COT-0006 ha sido asignado al operador Luis Hernández.',
+            'tipo' => 'servicio',
+            'canal' => 'sistema_push',
+            'estado' => 'no_leida',
+            'created_at' => now()->subHours(3),
+        ]);
+
+        \App\Models\Notificacion::create([
+            'empresa_id' => $empresa->id,
+            'usuario_id' => $clienteUser->id,
+            'mensaje' => 'Cotización COT-0007 está pendiente de tu revisión.',
+            'tipo' => 'cotizacion',
+            'canal' => 'sistema_push',
+            'estado' => 'no_leida',
+            'created_at' => now()->subDay(),
+        ]);
+
+        \App\Models\Notificacion::create([
+            'empresa_id' => $empresa->id,
+            'usuario_id' => $clienteUser->id,
+            'mensaje' => 'Cotización COT-0008 fue rechazada.',
+            'tipo' => 'cotizacion',
+            'canal' => 'sistema_push',
+            'estado' => 'leida',
+            'created_at' => now()->subDays(4),
         ]);
 
         // 7. Convenios

@@ -74,7 +74,7 @@ class User extends Authenticatable
 
     public function cotizacionesCreadas()
     {
-        return $this->hasMany(Cotizacion::class, 'created_by');
+        return $this->hasMany(Cotizacion::class, 'usuario_creador_id');
     }
 
     public function notificaciones()
