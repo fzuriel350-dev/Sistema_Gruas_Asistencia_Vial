@@ -33,7 +33,7 @@
 </td>
 <td>
 <div class="flex items-center gap-2">
-<a href="{{ route('servicios-configurados.show', $sc) }}" class="btn btn-sm btn-ghost">Ver</a>
+<a href="{{ route('servicios-configurados.show', $sc) }}" class="btn btn-sm btn-secondary">Ver</a>
 @can('admin')<a href="{{ route('servicios-configurados.edit', $sc) }}" class="btn btn-sm btn-primary">Editar</a>@endcan
 @can('admin')<form method="POST" action="{{ route('servicios-configurados.destroy', $sc) }}" data-confirm="¿Eliminar este servicio configurado?">                                    @csrf @method('DELETE')                                    <button type="submit" class="btn btn-sm btn-secondary">Eliminar</button>
 </form>@endcan
