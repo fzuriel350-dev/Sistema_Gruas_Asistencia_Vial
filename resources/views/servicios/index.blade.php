@@ -16,7 +16,7 @@
 <option value="cancelado" @selected(request('estado') === 'cancelado')>Cancelado</option>
 </select>
 <button type="submit" class="btn btn-sm btn-secondary">Buscar</button>
-</form>            @if (auth()->user()->isEmpleado())            <a href="{{ route('servicios.create') }}" class="btn btn-primary">+ Nuevo Servicio</a>            @endif        </div>
+</form>            @if (auth()->user()->isAdmin() || auth()->user()->isCotizador())            <a href="{{ route('servicios.create') }}" class="btn btn-primary">+ Nuevo Servicio</a>            @endif        </div>
 </div>
 <div class="table-container">
 <table>
@@ -52,7 +52,7 @@
 <td>{{ $s->fecha_fin?->format('d/m/Y H:i') ?: '—' }}</td>
 <td>
 <div class="flex items-center gap-2">
-<a href="{{ route('servicios.show', $s) }}" class="btn btn-sm btn-secondary">Ver</a>                                @if (auth()->user()->isEmpleado() && !in_array($s->estado, ['finalizado', 'cancelado']))                                <a href="{{ route('servicios.edit', $s) }}" class="btn btn-sm btn-primary">Editar</a>                                @endif                            </div>
+<a href="{{ route('servicios.show', $s) }}" class="btn btn-sm btn-secondary">Ver</a>                                @if ((auth()->user()->isAdmin() || auth()->user()->isCotizador()) && !in_array($s->estado, ['finalizado', 'cancelado']))                                <a href="{{ route('servicios.edit', $s) }}" class="btn btn-sm btn-primary">Editar</a>                                @endif                            </div>
 </td>
 </tr>                    @empty                    <tr>
 <td colspan="11" class="text-center text-gray-500 py-8">No hay servicios registrados.</td>

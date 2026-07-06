@@ -7,7 +7,7 @@
 {{ str_replace('_', ' ', ucfirst($servicio->estado)) }}</span>
 </div>
 <div class="flex items-center gap-2">
-<a href="{{ route('servicios.index') }}" class="btn btn-secondary">← Volver</a>            @if (auth()->user()->isEmpleado() && !in_array($servicio->estado, ['finalizado', 'cancelado']))            <a href="{{ route('servicios.edit', $servicio) }}" class="btn btn-primary">Editar</a>            @endif        </div>
+<a href="{{ route('servicios.index') }}" class="btn btn-secondary">← Volver</a>            @if ((auth()->user()->isAdmin() || auth()->user()->isCotizador()) && !in_array($servicio->estado, ['finalizado', 'cancelado']))            <a href="{{ route('servicios.edit', $servicio) }}" class="btn btn-primary">Editar</a>            @endif        </div>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-5">
 <div class="space-y-5">

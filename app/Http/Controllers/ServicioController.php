@@ -46,6 +46,9 @@ class ServicioController extends Controller
     public function create()
     {
         $this->authorize('empleado');
+        if (auth()->user()->isOperador()) abort(403);
+
+
         $cotizaciones = Cotizacion::where('empresa_id', session('empresa_id'))
             ->where('estatus', 'aprobado')
             ->with('cliente')
@@ -64,6 +67,9 @@ class ServicioController extends Controller
     public function store(Request $request)
     {
         $this->authorize('empleado');
+        if (auth()->user()->isOperador()) abort(403);
+
+
         $data = $request->validate([
             'cotizacion_id' => 'required|exists:cotizaciones,id',
             'operador_id' => 'required|exists:operadores,id',
@@ -92,6 +98,9 @@ class ServicioController extends Controller
     public function edit(Servicio $servicio)
     {
         $this->authorize('empleado');
+        if (auth()->user()->isOperador()) abort(403);
+
+
         $operadores = Operador::where('empresa_id', session('empresa_id'))
             ->with('empleado')
             ->get();
@@ -104,6 +113,9 @@ class ServicioController extends Controller
     public function update(Request $request, Servicio $servicio)
     {
         $this->authorize('empleado');
+        if (auth()->user()->isOperador()) abort(403);
+
+
         $data = $request->validate([
             'operador_id' => 'required|exists:operadores,id',
             'unidad_id' => 'required|exists:unidades,id',
@@ -131,6 +143,9 @@ class ServicioController extends Controller
     public function destroy(Servicio $servicio)
     {
         $this->authorize('empleado');
+        if (auth()->user()->isOperador()) abort(403);
+
+
         if ($servicio->operador_id) {
             Operador::where('id', $servicio->operador_id)->update(['disponible' => true]);
         }
