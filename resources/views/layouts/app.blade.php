@@ -18,7 +18,7 @@
 </div>
 <div>
 <h2 class="text-[15px] font-bold leading-tight">Grúas & Equipos</h2>
-<small class="text-[10px] opacity-45 tracking-wide">Panel de Administración</small>
+<small class="text-[10px] opacity-45 tracking-wide">@switch(auth()->user()->role) @case('admin') Panel de Administración @break @case('cotizador') Panel de Cotización @break @case('operador') Panel de Operador @break @case('cliente') Panel de Cliente @break @endswitch</small>
 </div>
 </div>            {{-- Accent bar --}}            <div class="h-[3px] shrink-0" style="background: linear-gradient(90deg, var(--geg-yellow), var(--geg-yellow-dark));">
 </div>            {{-- Nav --}}            <nav class="flex-1 px-2.5 py-3 overflow-y-auto">                @php $role = auth()->user()->role; $isAdmin = $role === 'admin'; $isCotizador = $role === 'cotizador'; $isOperador = $role === 'operador'; $isCliente = $role === 'cliente'; $isEmpleado = $isAdmin || $isCotizador; @endphp                <div class="mb-0.5">
@@ -79,6 +79,12 @@
 </a>
 </div>                @endif                @if ($isAdmin)                <div class="mb-0.5">
 <div class="text-[10px] uppercase tracking-widest text-white/30 px-3 pt-2.5 pb-1.5 font-semibold">Administración</div>
+<a href="{{ route('usuarios.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('usuarios.*') ? 'text-[#FFD500] nav-active' : 'text-white/55 hover:text-white/85 hover:bg-white/5' }}">
+<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292V4.354zM15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m5-9.949a4 4 0 110 5.292V4.354z" />
+</svg>
+<span>Usuarios</span>
+</a>
 <a href="{{ route('empleados.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('empleados.*') ? 'text-[#FFD500] nav-active' : 'text-white/55 hover:text-white/85 hover:bg-white/5' }}">
 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -127,12 +133,6 @@
 </svg>
 <span>Facturas</span>
 </a>
-<a href="{{ route('control-nomina.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('control-nomina.*') ? 'text-[#FFD500] nav-active' : 'text-white/55 hover:text-white/85 hover:bg-white/5' }}">
-<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-</svg>
-<span>Control Nómina</span>
-</a>
 <a href="{{ route('notificaciones.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('notificaciones.*') ? 'text-[#FFD500] nav-active' : 'text-white/55 hover:text-white/85 hover:bg-white/5' }}">
 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -154,15 +154,7 @@
 </svg>
 <span>Servicios activos</span>
 </a>
-</div>                @endif                @if ($isCliente)                <div class="mb-0.5">
-<div class="text-[10px] uppercase tracking-widest text-white/30 px-3 pt-2.5 pb-1.5 font-semibold">Panel</div>
-<a href="{{ route('clientes.dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('clientes.dashboard') ? 'text-[#FFD500] nav-active' : 'text-white/55 hover:text-white/85 hover:bg-white/5' }}">
-<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-</svg>
-<span>Dashboard</span>
-</a>
-</div>
+</div>                @endif                @if ($isCliente)
 <div class="mb-0.5">
 <div class="text-[10px] uppercase tracking-widest text-white/30 px-3 pt-2.5 pb-1.5 font-semibold">Servicios</div>
 <a href="{{ route('clientes.cotizaciones') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('clientes.cotizaciones') ? 'text-[#FFD500] nav-active' : 'text-white/55 hover:text-white/85 hover:bg-white/5' }}">

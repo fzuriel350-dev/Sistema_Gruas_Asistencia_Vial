@@ -28,17 +28,31 @@ class OperadorController extends Controller
         return view('operadores.create', compact('empleados'));
     }
 
+    protected function reglasValidacion(): array
+    {
+        return [
+            'empleado_id' => ['required', 'exists:empleados,id'],
+            'licencia_tipo' => ['required', 'string', 'max:50', 'regex:/^[\p{L}\p{N}\s\-]+$/u'],
+            'licencia_año_vencimiento' => ['required', 'date'],
+            'licencia_vencimiento_federal' => ['nullable', 'date'],
+            'disponible' => ['boolean'],
+            'puntos_acumulados' => ['nullable', 'integer', 'min:0'],
+        ];
+    }
+
+    protected function mensajesValidacion(): array
+    {
+        return [
+            'empleado_id.required' => 'Selecciona un empleado.',
+            'licencia_tipo.required' => 'El tipo de licencia es obligatorio.',
+            'licencia_año_vencimiento.required' => 'La fecha de vencimiento de la licencia es obligatoria.',
+        ];
+    }
+
     public function store(Request $request)
     {
         $this->authorize('empleado');
-        $data = $request->validate([
-            'empleado_id' => 'required|exists:empleados,id',
-            'licencia_tipo' => 'required|string|max:50',
-            'licencia_año_vencimiento' => 'required|date',
-            'licencia_vencimiento_federal' => 'nullable|date',
-            'disponible' => 'boolean',
-            'puntos_acumulados' => 'nullable|integer|min:0',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
         $data['empresa_id'] = session('empresa_id');
         $data['disponible'] = $request->boolean('disponible');
         Operador::create($data);
@@ -67,14 +81,7 @@ class OperadorController extends Controller
     public function update(Request $request, Operador $operador)
     {
         $this->authorize('empleado');
-        $data = $request->validate([
-            'empleado_id' => 'required|exists:empleados,id',
-            'licencia_tipo' => 'required|string|max:50',
-            'licencia_año_vencimiento' => 'required|date',
-            'licencia_vencimiento_federal' => 'nullable|date',
-            'disponible' => 'boolean',
-            'puntos_acumulados' => 'nullable|integer|min:0',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
         $data['disponible'] = $request->boolean('disponible');
         $operador->update($data);
         return redirect()->route('operadores.index')->with('success', 'Operador actualizado correctamente.');

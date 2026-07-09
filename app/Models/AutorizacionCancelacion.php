@@ -31,6 +31,8 @@ class AutorizacionCancelacion extends Model
         'cliente_cancela',
         'operador_siniestro',
         'falla_mecanica',
+        'llanta_ponchada',
+        'accidente',
         'duplicado',
         'otro',
     ];
@@ -39,6 +41,7 @@ class AutorizacionCancelacion extends Model
         'pendiente',
         'cancelado_por_cotizador',
         'rechazada',
+        'liberado',
     ];
 
     public function servicio()

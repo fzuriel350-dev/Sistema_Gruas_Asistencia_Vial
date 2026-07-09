@@ -38,11 +38,6 @@ class Cliente extends Model
         return $this->belongsTo(Aseguradora::class);
     }
 
-    public function convenios()
-    {
-        return $this->hasMany(Convenio::class);
-    }
-
     public function cotizaciones()
     {
         return $this->hasMany(Cotizacion::class);

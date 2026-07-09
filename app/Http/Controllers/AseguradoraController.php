@@ -22,13 +22,27 @@ class AseguradoraController extends Controller
         return view('aseguradoras.create');
     }
 
+    protected function reglasValidacion(): array
+    {
+        return [
+            'nombre' => ['required', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
+            'telefono' => ['nullable', 'string', 'max:20', 'regex:/^[\d\s\-\+\(\)]+$/'],
+        ];
+    }
+
+    protected function mensajesValidacion(): array
+    {
+        return [
+            'nombre.required' => 'El nombre de la aseguradora es obligatorio.',
+            'nombre.regex' => 'El nombre solo puede contener letras y espacios.',
+            'telefono.regex' => 'El teléfono solo puede contener números, guiones, paréntesis y signo +.',
+        ];
+    }
+
     public function store(Request $request)
     {
         $this->authorize('empleado');
-        $data = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
         $data['empresa_id'] = session('empresa_id');
         Aseguradora::create($data);
         return redirect()->route('aseguradoras.index')->with('success', 'Aseguradora creada correctamente.');
@@ -50,10 +64,7 @@ class AseguradoraController extends Controller
     public function update(Request $request, Aseguradora $aseguradora)
     {
         $this->authorize('empleado');
-        $data = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
         $aseguradora->update($data);
         return redirect()->route('aseguradoras.index')->with('success', 'Aseguradora actualizada correctamente.');
     }

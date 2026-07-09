@@ -4,7 +4,6 @@ use App\Http\Controllers\AseguradoraController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ClientePanelController;
 use App\Http\Controllers\ConfiguracionController;
-use App\Http\Controllers\ControlNominaController;
 use App\Http\Controllers\ConvenioController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\DashboardController;
@@ -21,6 +20,7 @@ use App\Http\Controllers\ServicioConfiguradoController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\TipoServicioController;
 use App\Http\Controllers\UnidadController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -49,10 +49,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('bitacora-tiempos', BitacoraTiempoServicioController::class);
     Route::resource('autorizaciones-cancelacion', AutorizacionCancelacionController::class);
     Route::resource('facturas', FacturaController::class);
-    Route::resource('control-nomina', ControlNominaController::class);
     Route::resource('servicios-configurados', ServicioConfiguradoController::class);
     Route::resource('convenios', ConvenioController::class);
     Route::resource('servicios', ServicioController::class);
+    Route::patch('servicios/{servicio}/avanzar', [ServicioController::class, 'avanzarEstado'])->name('servicios.avanzar');
+    Route::post('servicios/{servicio}/liberar', [ServicioController::class, 'liberar'])->name('servicios.liberar');
+    Route::post('servicios/{servicio}/cancelar', [ServicioController::class, 'cancelarPorCotizador'])->name('servicios.cancelar');
+    Route::resource('usuarios', UserController::class);
 
     Route::get('notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
     Route::patch('notificaciones/{notificacione}/leer', [NotificacionController::class, 'marcarLeida'])->name('notificaciones.leer');
@@ -62,7 +65,6 @@ Route::middleware('auth')->group(function () {
     Route::put('configuracion', [ConfiguracionController::class, 'update'])->name('configuracion.update');
 
         Route::prefix('panel')->name('clientes.')->group(function () {
-        Route::get('/', [ClientePanelController::class, 'dashboard'])->name('dashboard');
         Route::get('/servicios', [ClientePanelController::class, 'servicios'])->name('servicios');
         Route::get('/servicios/{servicio}', [ClientePanelController::class, 'servicioShow'])->name('servicio-show');
         Route::post('/servicios/{servicio}/cancelar', [ClientePanelController::class, 'cancelarServicio'])->name('servicios.cancelar');

@@ -19,7 +19,6 @@ use App\Models\CargaDiesel;
 use App\Models\BitacoraTiempoServicio;
 use App\Models\AutorizacionCancelacion;
 use App\Models\Factura;
-use App\Models\ControlNomina;
 use App\Models\ServicioConfigurado;
 use Illuminate\Database\Seeder;
 
@@ -454,7 +453,6 @@ class DatabaseSeeder extends Seeder
         // 7. Convenios
         Convenio::create([
             'empresa_id' => $empresa->id,
-            'cliente_id' => $cliente6->id,
             'aseguradora_id' => $qualitas->id,
             'nombre' => 'Convenio Quálitas Básico',
             'tipo' => 'local',
@@ -468,7 +466,6 @@ class DatabaseSeeder extends Seeder
 
         $convenioGnp = Convenio::create([
             'empresa_id' => $empresa->id,
-            'cliente_id' => $cliente3->id,
             'aseguradora_id' => $gnp->id,
             'nombre' => 'Convenio GNP Corporativo',
             'tipo' => 'foraneo',
@@ -700,20 +697,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // 14. Control Nómina
-        ControlNomina::create([
-            'empresa_id' => $empresa->id,
-            'operador_id' => $operador1->id,
-            'fecha_desde' => now()->startOfWeek(),
-            'fecha_hasta' => now()->endOfWeek(),
-            'sueldo_base_semanal' => 3500.00,
-            'bonos_servicios' => 500.00,
-            'descuentos_prestamos' => 200.00,
-            'total_neto_a_pagar' => 3800.00,
-            'estatus' => 'pendiente',
-        ]);
-
-        // 15. Cargas Diesel
+        // 14. Cargas Diesel
         CargaDiesel::create([
             'empresa_id' => $empresa->id,
             'unidad_id' => $unidad1->id,

@@ -26,6 +26,7 @@ class Servicio extends Model
         'kms_cobrados_reales',
         'costo_final_real',
         'observaciones',
+        'motivo_liberacion',
     ];
 
     protected function casts(): array

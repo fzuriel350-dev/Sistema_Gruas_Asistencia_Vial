@@ -34,9 +34,20 @@ class Cotizacion extends Model
         'convenio_aplicado_id',
         'usuario_creador_id',
         'estatus',
+        'notas',
     ];
 
     const ESTATUS = ['pendiente', 'aprobado', 'rechazado'];
+
+    public function getOrigenAttribute()
+    {
+        return $this->origen_direccion;
+    }
+
+    public function getDestinoAttribute()
+    {
+        return $this->destino_direccion;
+    }
 
     public function empresa()
     {

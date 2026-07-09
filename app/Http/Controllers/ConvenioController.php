@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Convenio;
-use App\Models\Cliente;
 use App\Models\Aseguradora;
 use Illuminate\Http\Request;
 
@@ -13,7 +12,7 @@ class ConvenioController extends Controller
     {
         $this->authorize('empleado');
         $convenios = Convenio::where('empresa_id', session('empresa_id'))
-            ->with('cliente', 'aseguradora')
+            ->with('aseguradora')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         return view('convenios.index', compact('convenios'));
@@ -22,30 +21,45 @@ class ConvenioController extends Controller
     public function create()
     {
         $this->authorize('admin');
-        $clientes = Cliente::where('empresa_id', session('empresa_id'))
-            ->orderBy('nombre')
-            ->get();
         $aseguradoras = Aseguradora::where('empresa_id', session('empresa_id'))
             ->orderBy('nombre')
             ->get();
-        return view('convenios.create', compact('clientes', 'aseguradoras'));
+        return view('convenios.create', compact('aseguradoras'));
+    }
+
+    protected function reglasValidacion(): array
+    {
+        return [
+            'aseguradora_id' => ['required', 'exists:aseguradoras,id'],
+            'nombre' => ['required', 'string', 'max:150', 'regex:/^[\p{L}\p{N}\s\.\-\/]+$/u'],
+            'tipo' => ['required', 'in:local,foraneo'],
+            'costo_banderazo' => ['required', 'numeric', 'min:0'],
+            'costo_km' => ['required', 'numeric', 'min:0'],
+            'km_incluidos' => ['required', 'numeric', 'min:0'],
+            'cubre_casetas_peaje' => ['required', 'in:0,1'],
+            'descuento' => ['required', 'numeric', 'min:0', 'max:100'],
+            'cobertura' => ['required', 'string', 'max:255'],
+        ];
+    }
+
+    protected function mensajesValidacion(): array
+    {
+        return [
+            'aseguradora_id.required' => 'Selecciona una aseguradora.',
+            'nombre.required' => 'El nombre del convenio es obligatorio.',
+            'tipo.required' => 'Selecciona el tipo de convenio.',
+            'costo_banderazo.required' => 'El costo de banderazo es obligatorio.',
+            'costo_km.required' => 'El costo por km es obligatorio.',
+            'km_incluidos.required' => 'Los km incluidos son obligatorios.',
+            'descuento.max' => 'El descuento no puede ser mayor a 100.',
+            'cobertura.required' => 'La cobertura es obligatoria.',
+        ];
     }
 
     public function store(Request $request)
     {
         $this->authorize('admin');
-        $data = $request->validate([
-            'cliente_id' => 'required|exists:clientes,id',
-            'aseguradora_id' => 'required|exists:aseguradoras,id',
-            'nombre' => 'required|string|max:150',
-            'tipo' => 'required|in:local,foraneo',
-            'costo_banderazo' => 'required|numeric|min:0',
-            'costo_km' => 'required|numeric|min:0',
-            'km_incluidos' => 'required|numeric|min:0',
-            'cubre_casetas_peaje' => 'required|in:0,1',
-            'descuento' => 'required|numeric|min:0|max:100',
-            'cobertura' => 'required|string|max:255',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
         $data['empresa_id'] = session('empresa_id');
         Convenio::create($data);
         return redirect()->route('convenios.index')->with('success', 'Convenio creado correctamente.');
@@ -54,37 +68,23 @@ class ConvenioController extends Controller
     public function show(Convenio $convenio)
     {
         $this->authorize('empleado');
-        $convenio->load('cliente', 'aseguradora');
+        $convenio->load('aseguradora');
         return view('convenios.show', compact('convenio'));
     }
 
     public function edit(Convenio $convenio)
     {
         $this->authorize('admin');
-        $clientes = Cliente::where('empresa_id', session('empresa_id'))
-            ->orderBy('nombre')
-            ->get();
         $aseguradoras = Aseguradora::where('empresa_id', session('empresa_id'))
             ->orderBy('nombre')
             ->get();
-        return view('convenios.edit', compact('convenio', 'clientes', 'aseguradoras'));
+        return view('convenios.edit', compact('convenio', 'aseguradoras'));
     }
 
     public function update(Request $request, Convenio $convenio)
     {
         $this->authorize('admin');
-        $data = $request->validate([
-            'cliente_id' => 'required|exists:clientes,id',
-            'aseguradora_id' => 'required|exists:aseguradoras,id',
-            'nombre' => 'required|string|max:150',
-            'tipo' => 'required|in:local,foraneo',
-            'costo_banderazo' => 'required|numeric|min:0',
-            'costo_km' => 'required|numeric|min:0',
-            'km_incluidos' => 'required|numeric|min:0',
-            'cubre_casetas_peaje' => 'required|in:0,1',
-            'descuento' => 'required|numeric|min:0|max:100',
-            'cobertura' => 'required|string|max:255',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
         $convenio->update($data);
         return redirect()->route('convenios.index')->with('success', 'Convenio actualizado correctamente.');
     }

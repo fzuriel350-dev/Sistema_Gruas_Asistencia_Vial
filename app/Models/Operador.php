@@ -55,9 +55,4 @@ class Operador extends Model
     {
         return $this->hasMany(CargaDiesel::class);
     }
-
-    public function controlNomina()
-    {
-        return $this->hasMany(ControlNomina::class);
-    }
 }

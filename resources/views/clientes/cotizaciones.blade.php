@@ -56,16 +56,16 @@
                                 <span class="font-mono font-semibold text-sm">#{{ $cotizacion->folio }}</span>
                             </td>
                             <td class="text-gray-600 text-sm">
-                                {{ $cotizacion->origen }} → {{ $cotizacion->destino }}
+                                {{ $cotizacion->origen_direccion }} → {{ $cotizacion->destino_direccion }}
                             </td>
                             <td>
                                 <span class="badge badge-gray">{{ $cotizacion->tipoServicio->nombre ?? '-' }}</span>
                             </td>
                             <td class="text-sm text-gray-600">
-                                {{ $cotizacion->marca }} {{ $cotizacion->modelo }}
+                                {{ $cotizacion->marca ?? '—' }} {{ $cotizacion->modelo ?? '' }}
                             </td>
                             <td class="font-semibold text-sm">
-                                ${{ number_format($cotizacion->subtotal + ($cotizacion->iva ?? 0) - ($cotizacion->descuento ?? 0), 2) }}
+                                ${{ number_format($cotizacion->costo_total, 2) }}
                             </td>
                             <td>
                                 @php
@@ -89,7 +89,7 @@
                                         </svg>
                                     </a>
                                     @if ($cotizacion->estatus === 'pendiente')
-                                        <form method="POST" action="{{ route('clientes.cotizaciones.aprobar', $cotizacion) }}" class="inline" data-confirm="¿Estás seguro de aprobar esta cotización? Se generará un servicio automáticamente.">
+                                        <form method="POST" action="{{ route('clientes.cotizaciones.aprobar', $cotizacion) }}" class="inline" data-confirm-title="✅ Aprobar cotización" data-confirm="Al aprobar esta cotización se generará un servicio de grúa automáticamente. ¿Deseas continuar?" data-confirm-icon="success" data-confirm-button="Sí, aprobar">
                                             @csrf
                                             <button type="submit" class="btn-icon text-emerald-600 hover:bg-emerald-50" title="Aprobar">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@
                                                 </svg>
                                             </button>
                                         </form>
-                                        <button type="button" class="btn-icon text-red-500 hover:bg-red-50" title="Rechazar" onclick="document.getElementById('rechazar-modal-{{ $cotizacion->id }}').classList.remove('hidden')">
+                                        <button type="button" class="btn-icon text-red-500 hover:bg-red-50" title="Rechazar" onclick="rechazarCotizacion('{{ $cotizacion->folio }}', {{ $cotizacion->id }})">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
@@ -118,23 +118,55 @@
     </div>
 </div>
 
-@foreach ($cotizaciones as $cotizacion)
-    <div id="rechazar-modal-{{ $cotizacion->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40" onclick="if(event.target===this)this.classList.add('hidden')">
-        <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl" onclick="event.stopPropagation()">
-            <h3 class="text-lg font-bold text-gray-800 mb-2">Rechazar cotización</h3>
-            <p class="text-sm text-gray-600 mb-4">Cotización #{{ $cotizacion->folio }}</p>
-            <form method="POST" action="{{ route('clientes.cotizaciones.rechazar', $cotizacion) }}">
-                @csrf
-                <div class="mb-4">
-                    <label class="label">Motivo (opcional)</label>
-                    <textarea name="motivo" rows="3" class="input" placeholder="Indica por qué rechazas esta cotización..."></textarea>
-                </div>
-                <div class="flex gap-2 justify-end">
-                    <button type="button" class="btn-secondary" onclick="this.closest('[id^=rechazar-modal]').classList.add('hidden')">Cancelar</button>
-                    <button type="submit" class="btn-primary" style="background: var(--geg-red, #ef4444);">Rechazar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-@endforeach
+@push('scripts')
+<script>
+function rechazarCotizacion(folio, id) {
+    Swal.fire({
+        title: '❌ Rechazar cotización',
+        html: `
+            <p class="text-sm text-gray-600 mb-3">Cotización #${folio}</p>
+            <textarea id="motivo-rechazo" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-red-200 focus:border-red-400 outline-none transition-all" placeholder="Indica por qué rechazas esta cotización (opcional)..."></textarea>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, rechazar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#ef4444',
+        reverseButtons: true,
+        customClass: {
+            popup: 'swal-popup-custom',
+            title: 'swal-title-custom',
+            confirmButton: 'swal-confirm-custom',
+            cancelButton: 'swal-cancel-custom',
+        },
+        didRender: function() {
+            document.getElementById('motivo-rechazo').focus();
+        },
+        preConfirm: function() {
+            return document.getElementById('motivo-rechazo').value;
+        }
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/panel/cotizaciones/' + id + '/rechazar';
+            var csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = '{{ csrf_token() }}';
+            form.appendChild(csrf);
+            if (result.value) {
+                var motivo = document.createElement('input');
+                motivo.type = 'hidden';
+                motivo.name = 'motivo';
+                motivo.value = result.value;
+                form.appendChild(motivo);
+            }
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
+</script>
+@endpush
 @endsection

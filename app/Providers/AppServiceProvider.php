@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 if ($user->isOperador()) {
                     $query->where('operador_id', $user->empleado?->operador?->id);
                 } elseif ($user->isCliente()) {
-                    $query->whereHas('cotizacion', fn($q) => $q->where('created_by', $user->id));
+                    $query->whereHas('cotizacion', fn($q) => $q->where('usuario_creador_id', $user->id));
                 }
 
                 $serviciosActivos = $query->count();

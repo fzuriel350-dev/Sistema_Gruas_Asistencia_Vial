@@ -12,12 +12,6 @@
 <x-input-error :messages="$errors->get('nombre')" />
 </div>
 <div class="form-group">
-<label for="cliente_id">Cliente</label>
-<select id="cliente_id" name="cliente_id" required>
-<option value="">Seleccionar cliente...</option>                    @foreach ($clientes as $cl)                        <option value="{{ $cl->id }}" @selected(old('cliente_id') == $cl->id)>{{ $cl->nombre }}</option>                    @endforeach                </select>
-<x-input-error :messages="$errors->get('cliente_id')" />
-</div>
-<div class="form-group">
 <label for="aseguradora_id">Aseguradora</label>
 <select id="aseguradora_id" name="aseguradora_id" required>
 <option value="">Seleccionar aseguradora...</option>                    @foreach ($aseguradoras as $a)                        <option value="{{ $a->id }}" @selected(old('aseguradora_id') == $a->id)>{{ $a->nombre }}</option>                    @endforeach                </select>

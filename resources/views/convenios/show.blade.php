@@ -12,10 +12,6 @@
 <p class="font-medium">{{ $convenio->nombre }}</p>
 </div>
 <div>
-<p class="text-xs text-gray-500 uppercase font-semibold">Cliente</p>
-<p class="font-medium">{{ $convenio->cliente?->nombre ?: '—' }}</p>
-</div>
-<div>
 <p class="text-xs text-gray-500 uppercase font-semibold">Aseguradora</p>
 <p class="font-medium">{{ $convenio->aseguradora?->nombre ?: '—' }}</p>
 </div>

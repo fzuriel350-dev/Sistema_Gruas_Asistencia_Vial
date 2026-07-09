@@ -10,11 +10,11 @@
 <div class="form-grid">
 <div class="form-group">
 <label>Cliente</label>
-<select name="cliente_id">
+<select name="cliente_id" x-model="cliente_id" @@change="seleccionarCliente()">
 <option value="">Sin cliente registrado...</option>                                    @foreach ($clientes as $cliente)                                    <option value="{{ $cliente->id }}" @selected(old('cliente_id') == $cliente->id)>                                        {{ $cliente->nombre }}                                    </option>                                    @endforeach                                </select>                                @error('cliente_id') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror                            </div>
 <div class="form-group">
 <label>Aseguradora</label>
-<select name="aseguradora_id" required>
+<select name="aseguradora_id" x-model="aseguradora_id" @@change="aseguradora_id = $event.target.value; filtrarConvenios(); resetearConvenio()" required>
 <option value="">Seleccionar...</option>                                    @foreach ($aseguradoras as $a)                                    <option value="{{ $a->id }}" @selected(old('aseguradora_id') == $a->id)>{{ $a->nombre }}</option>                                    @endforeach                                </select>                                @error('aseguradora_id') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror                            </div>
 </div>
 </div>
@@ -73,42 +73,54 @@
 </div>
 </div>
 <div class="mt-3 flex flex-col gap-3">
-<div class="route-card" :class="{ 'selected': !incluye_peajes }" @@click="incluye_peajes = false; costo_aprox_casetas = 0">
+<label class="route-card cursor-pointer" :style="incluye_peajes == '0' ? 'border-color: #FFD500; background: linear-gradient(135deg, #FFFEF0, #FFF9C4); box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.2);' : ''" x-on:click="incluye_peajes = '0'; costo_aprox_casetas = 0">
+<div class="flex items-center gap-3">
+<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" :style="incluye_peajes == '0' ? 'border-color: #FFD500; background: #FFD500;' : ''">
+<div x-show="incluye_peajes == '0'" class="w-2 h-2 rounded-full bg-white"></div>
+</div>
 <div>
 <div class="route-title">Ruta 1 — Sin peaje</div>
 <div class="route-meta">
-<span>📍 <span x-text="distancia_km || 0">
-</span> km</span>
-<span>⏱ <span x-text="tiempo_estimado_minutos || 0">
-</span> min</span>
+<span>📍 <span x-text="distancia_km || 0"></span> km</span>
+<span>⏱ <span x-text="tiempo_estimado_minutos || 0"></span> min</span>
 </div>
 </div>
-<div class="route-price" x-text="'$' + formatPrice(sinPeajeTotal())">
+<div class="route-price ml-auto" x-show="sinPeajeTotal() > 0" x-text="'$' + formatPrice(sinPeajeTotal())"></div>
 </div>
+</label>
+<label class="route-card cursor-pointer" :style="incluye_peajes == '1' ? 'border-color: #FFD500; background: linear-gradient(135deg, #FFFEF0, #FFF9C4); box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.2);' : ''" x-on:click="incluye_peajes = '1'">
+<div class="flex items-center gap-3">
+<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" :style="incluye_peajes == '1' ? 'border-color: #FFD500; background: #FFD500;' : ''">
+<div x-show="incluye_peajes == '1'" class="w-2 h-2 rounded-full bg-white"></div>
 </div>
-<div class="route-card" :class="{ 'selected': incluye_peajes }" @@click="incluye_peajes = true">
-<div>
+<div class="flex-1">
 <div class="route-title">Ruta 2 — Con peaje</div>
 <div class="route-meta">
-<span>📍 <span x-text="distancia_km || 0">
-</span> km</span>
-<span>⏱ <span x-text="tiempo_estimado_minutos || 0">
-</span> min</span>
+<span>📍 <span x-text="distancia_km || 0"></span> km</span>
+<span>⏱ <span x-text="tiempo_estimado_minutos || 0"></span> min</span>
 </div>
 <div class="mt-2 flex items-center gap-2">
 <span class="text-xs text-gray-500">Costo aprox. casetas:</span>
-<input type="number" class="w-24 px-2 py-0.5 text-xs border rounded" step="1" x-model.number="costo_aprox_casetas" @@click.stop>
+<input type="number" class="w-24 px-2 py-0.5 text-xs border rounded" step="1" x-model.number="costo_aprox_casetas" x-on:click.stop>
 </div>
 </div>
-<div class="route-price" x-text="'$' + formatPrice(conPeajeTotal())">
+<div class="route-price" x-show="conPeajeTotal() > 0" x-text="'$' + formatPrice(conPeajeTotal())"></div>
 </div>
+</label>
+<input type="hidden" name="costo_aprox_casetas" :value="costo_aprox_casetas">
+<input type="hidden" name="costo_banderazo" :value="costo_banderazo">
+<input type="hidden" name="costo_km" :value="costo_km">
+<input type="hidden" name="km_excedente" :value="Math.max(0, (distancia_km || 0) - (km_incluidos || 0))">
 </div>
-<input type="hidden" name="incluye_peajes" x-bind:value="incluye_peajes">
-<input type="hidden" name="costo_aprox_casetas" x-bind:value="costo_aprox_casetas">
-</div>
-</div>
-</div>
-<div class="form-actions">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Detalles y observaciones</h3></div>
+                <div class="card-body">
+                    <textarea name="notas" rows="3" class="w-full px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all" placeholder="Notas internas, instrucciones especiales...">{{ old('notas') }}</textarea>
+                </div>
+            </div>
+            <div class="form-actions">
 <a href="{{ route('cotizaciones.index') }}" class="btn btn-secondary">Cancelar</a>
 <button type="submit" class="btn btn-primary">Generar cotización</button>
 </div>
@@ -151,7 +163,7 @@
 </div>
 <div class="card-body">                        @if ($convenios->count())                        <div class="form-group">
 <select name="convenio_aplicado_id" x-model="convenio_aplicado_id" @@change="actualizarConvenio()">
-<option value="">Sin convenio</option>                                @foreach ($convenios as $c)                                <option value="{{ $c->id }}"                                    data-descuento="{{ $c->descuento }}">                                    {{ $c->nombre }} ({{ $c->descuento }}% descuento)                                </option>                                @endforeach                            </select>
+<option value="" data-aseguradora-id="" data-costo-banderazo="0" data-costo-km="0" data-km-incluidos="0" data-cubre-casetas="0">Sin convenio</option>                                @foreach ($convenios as $c)                                <option value="{{ $c->id }}"                                    data-aseguradora-id="{{ $c->aseguradora_id }}"                                    data-descuento="{{ $c->descuento }}"                                    data-costo-banderazo="{{ $c->costo_banderazo }}"                                    data-costo-km="{{ $c->costo_km }}"                                    data-km-incluidos="{{ $c->km_incluidos }}"                                    data-cubre-casetas="{{ $c->cubre_casetas_peaje ? 1 : 0 }}">                                    {{ $c->nombre }} ({{ $c->descuento }}% descuento)                                </option>                                @endforeach                            </select>
 </div>
 <template x-if="convenio_aplicado_id">
 <div class="flex items-center gap-3 p-3 rounded-lg border" style="background: #f0fdf4; border-color: #bbf7d0;">
@@ -159,7 +171,8 @@
 <div>
 <div class="font-semibold text-sm" x-text="convenioNombre">
 </div>
-<div class="text-xs text-gray-500" x-text="'Descuento: ' + descuento_porcentaje + '%'">
+<div class="text-xs text-gray-500" x-text="'Descuento: ' + descuento_porcentaje + '%'"></div>
+<div class="text-xs text-gray-500 mt-1" x-text="'Banderazo: $' + formatPrice(costo_banderazo) + ' | Km: $' + formatPrice(costo_km)">
 </div>
 </div>
 </div>
@@ -172,6 +185,91 @@
 @endsection
 
 @push('scripts')
-<script>function cotizacionForm() {    return {        destino_direccion: '{{ old('destino_direccion') }}',        origen_direccion: '{{ old('origen_direccion') }}',        distancia_km: {{ old('distancia_km', 0) }},        tiempo_estimado_minutos: {{ old('tiempo_estimado_minutos', 0) }},        incluye_peajes: {{ old('incluye_peajes', false) ? 'true' : 'false' }},        costo_aprox_casetas: {{ old('costo_aprox_casetas', 0) }},        costo_banderazo: 500,        costo_km: 120,        convenio_aplicado_id: '{{ old('convenio_aplicado_id') }}',        descuento_porcentaje: 0,        convenioNombre: '',        formatPrice(v) { return v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') },        costoKilometraje() { return (this.distancia_km || 0) * this.costo_km },        sinPeajeTotal() { return this.costo_banderazo + this.costoKilometraje() },        conPeajeTotal() { return this.costo_banderazo + this.costoKilometraje() + (this.costo_aprox_casetas || 0) },        total() { return this.costo_banderazo + this.costoKilometraje() + (this.costo_aprox_casetas || 0) },        actualizarConvenio() {            const sel = document.querySelector('[name="convenio_aplicado_id"]');            const opt = sel.options[sel.selectedIndex];            if (opt && opt.value) {                this.descuento_porcentaje = parseFloat(opt.dataset.descuento) || 0;                this.convenioNombre = opt.text;            } else {                this.descuento_porcentaje = 0;                this.convenioNombre = '';            }        }    }
+<script>
+function cotizacionForm() {
+    return {
+        init() {
+            if (this.cliente_id) {
+                this.$nextTick(() => { this.filtrarAseguradoras(); this.filtrarConvenios(); });
+            }
+        },
+        clientesAseguradora: { @foreach ($clientes as $cliente) {{ $cliente->id }}: '{{ $cliente->aseguradora_id }}', @endforeach },
+        cliente_id: '{{ old('cliente_id') }}',
+        aseguradora_id: '{{ old('aseguradora_id') }}',
+        destino_direccion: '{{ old('destino_direccion') }}',
+        origen_direccion: '{{ old('origen_direccion') }}',
+        distancia_km: {{ old('distancia_km', 0) }},
+        tiempo_estimado_minutos: {{ old('tiempo_estimado_minutos', 0) }},
+        incluye_peajes: '{{ old('incluye_peajes', '0') }}',
+        costo_aprox_casetas: {{ old('costo_aprox_casetas', 0) }},
+        costo_banderazo: 0,
+        costo_km: 0,
+        km_incluidos: 0,
+        convenio_aplicado_id: '{{ old('convenio_aplicado_id') }}',
+        descuento_porcentaje: 0,
+        convenioNombre: '',
+        formatPrice(v) { return v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') },
+        costoKilometraje() { return Math.max(0, (this.distancia_km || 0) - (this.km_incluidos || 0)) * this.costo_km },
+        baseSinPeaje() { return this.costo_banderazo + this.costoKilometraje() },
+        baseConPeaje() { return this.costo_banderazo + this.costoKilometraje() + (this.costo_aprox_casetas || 0) },
+        sinPeajeTotal() { const b = this.baseSinPeaje(); return this.descuento_porcentaje > 0 ? b * (1 - this.descuento_porcentaje / 100) : b },
+        conPeajeTotal() { const b = this.baseConPeaje(); return this.descuento_porcentaje > 0 ? b * (1 - this.descuento_porcentaje / 100) : b },
+        total() { return this.incluye_peajes == '1' ? this.conPeajeTotal() : this.sinPeajeTotal() },
+        seleccionarCliente() {
+            const id = this.cliente_id;
+            this.aseguradora_id = id && this.clientesAseguradora[id] ? this.clientesAseguradora[id] : '';
+            this.filtrarAseguradoras();
+            this.filtrarConvenios();
+            this.resetearConvenio();
+        },
+        filtrarAseguradoras() {
+            const sel = document.querySelector('[name="aseguradora_id"]');
+            for (const opt of sel.options) {
+                if (!opt.value) { opt.hidden = !this.aseguradora_id; continue; }
+                opt.hidden = opt.value !== this.aseguradora_id;
+            }
+        },
+        filtrarConvenios() {
+            const sel = document.querySelector('[name="convenio_aplicado_id"]');
+            for (const opt of sel.options) {
+                if (!opt.value) { opt.hidden = false; continue; }
+                const asegId = opt.dataset.aseguradoraId || '';
+                opt.hidden = asegId !== this.aseguradora_id;
+            }
+        },
+        resetearConvenio() {
+            this.convenio_aplicado_id = '';
+            this.descuento_porcentaje = 0;
+            this.costo_banderazo = 0;
+            this.costo_km = 0;
+            this.km_incluidos = 0;
+            this.convenioNombre = '';
+            this.incluye_peajes = '0';
+            this.costo_aprox_casetas = 0;
+        },
+        actualizarConvenio() {
+            const sel = document.querySelector('[name="convenio_aplicado_id"]');
+            const opt = sel.options[sel.selectedIndex];
+            if (opt && opt.value) {
+                this.descuento_porcentaje = parseFloat(opt.dataset.descuento) || 0;
+                this.costo_banderazo = parseFloat(opt.dataset.costoBanderazo) || 0;
+                this.costo_km = parseFloat(opt.dataset.costoKm) || 0;
+                this.km_incluidos = parseInt(opt.dataset.kmIncluidos) || 0;
+                this.convenioNombre = opt.text;
+                if (parseInt(opt.dataset.cubreCasetas)) {
+                    this.incluye_peajes = '1';
+                }
+            } else {
+                this.descuento_porcentaje = 0;
+                this.costo_banderazo = 0;
+                this.costo_km = 0;
+                this.km_incluidos = 0;
+                this.convenioNombre = '';
+                this.incluye_peajes = '0';
+                this.costo_aprox_casetas = 0;
+            }
+        }
+    }
+}
 </script>
 @endpush

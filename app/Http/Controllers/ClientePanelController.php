@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AutorizacionCancelacion;
+use App\Models\Cliente;
 use App\Models\Cotizacion;
 use App\Models\Servicio;
 use App\Models\Notificacion;
@@ -22,64 +23,23 @@ class ClientePanelController extends Controller
         });
     }
 
-    public function dashboard()
+    protected function clienteId(): ?int
     {
-        $user = auth()->user();
-        $empresaId = session('empresa_id');
-
-        $cotizaciones = Cotizacion::where('empresa_id', $empresaId)
-            ->where('usuario_creador_id', $user->id);
-
-        $pendientes = (clone $cotizaciones)->where('estatus', 'pendiente')->count();
-        $aprobadas = (clone $cotizaciones)->where('estatus', 'aprobado')->count();
-        $rechazadas = (clone $cotizaciones)->where('estatus', 'rechazado')->count();
-
-        $servicios = Servicio::where('empresa_id', $empresaId)
-            ->whereHas('cotizacion', fn($q) => $q->where('usuario_creador_id', $user->id));
-
-        $activos = (clone $servicios)->whereIn('estado', Servicio::ESTADOS_ACTIVOS)->count();
-        $finalizados = (clone $servicios)->where('estado', 'finalizado')->count();
-        $servicioActivo = (clone $servicios)->whereIn('estado', Servicio::ESTADOS_ACTIVOS)
-            ->with('cotizacion', 'operador.empleado')
-            ->first();
-
-        $serviciosPorMes = (clone $servicios)
-            ->selectRaw('strftime("%m", created_at) as mes, count(*) as total')
-            ->whereYear('created_at', now()->year)
-            ->groupBy('mes')
-            ->orderBy('mes')
-            ->pluck('total', 'mes');
-
-        $actividades = Cotizacion::where('empresa_id', $empresaId)
-            ->where('usuario_creador_id', $user->id)
-            ->with('tipoServicio')
-            ->latest()
-            ->take(5)
-            ->get()
-            ->map(fn($c) => [
-                'text' => "{$c->folio}: <strong>" . ucfirst($c->estatus) . "</strong>",
-                'time' => $c->created_at->diffForHumans(),
-                'dot' => match ($c->estatus) {
-                    'aprobado' => 'success',
-                    'rechazado' => 'danger',
-                    default => 'pending',
-                },
-            ]);
-
-        return view('clientes.dashboard', compact(
-            'pendientes', 'aprobadas', 'rechazadas',
-            'activos', 'finalizados', 'servicioActivo',
-            'serviciosPorMes', 'actividades'
-        ));
+        return Cliente::where('usuario_id', auth()->id())->value('id');
     }
 
     public function servicios(Request $request)
     {
-        $user = auth()->user();
         $empresaId = session('empresa_id');
+        $clienteId = $this->clienteId();
+
+        if (!$clienteId) {
+            $servicios = collect([]);
+            return view('clientes.servicios', compact('servicios'));
+        }
 
         $query = Servicio::where('empresa_id', $empresaId)
-            ->whereHas('cotizacion', fn($q) => $q->where('usuario_creador_id', $user->id))
+            ->whereHas('cotizacion', fn($q) => $q->where('cliente_id', $clienteId))
             ->with('cotizacion.tipoServicio', 'operador.empleado', 'unidad', 'tipoServicio');
 
         if ($request->filled('q')) {
@@ -103,8 +63,7 @@ class ClientePanelController extends Controller
 
     public function servicioShow(Servicio $servicio)
     {
-        $user = auth()->user();
-        if ($servicio->cotizacion->usuario_creador_id !== $user->id) {
+        if ($servicio->cotizacion->cliente_id !== $this->clienteId()) {
             abort(403);
         }
 
@@ -130,8 +89,7 @@ class ClientePanelController extends Controller
 
     public function cancelarServicio(Request $request, Servicio $servicio)
     {
-        $user = auth()->user();
-        if ($servicio->cotizacion->usuario_creador_id !== $user->id) {
+        if ($servicio->cotizacion->cliente_id !== $this->clienteId()) {
             abort(403);
         }
 
@@ -187,7 +145,7 @@ class ClientePanelController extends Controller
     public function aprobarCotizacion(Request $request, Cotizacion $cotizacione)
     {
         $user = auth()->user();
-        if ($cotizacione->usuario_creador_id !== $user->id || $cotizacione->estatus !== 'pendiente') {
+        if ($cotizacione->cliente_id !== $this->clienteId() || $cotizacione->estatus !== 'pendiente') {
             abort(403);
         }
 
@@ -215,19 +173,15 @@ class ClientePanelController extends Controller
 
     public function rechazarCotizacion(Request $request, Cotizacion $cotizacione)
     {
-        $user = auth()->user();
-        if ($cotizacione->usuario_creador_id !== $user->id || $cotizacione->estatus !== 'pendiente') {
+        if ($cotizacione->cliente_id !== $this->clienteId() || $cotizacione->estatus !== 'pendiente') {
             abort(403);
         }
 
         $request->validate(['motivo' => 'nullable|string|max:500']);
 
-        $notas = $cotizacione->notas;
-        if ($request->filled('motivo')) {
-            $notas = ($notas ? $notas . "\n\n" : '') . "Motivo de rechazo: " . $request->motivo;
-        }
+        $user = auth()->user();
 
-        $cotizacione->update(['estatus' => 'rechazado', 'notas' => $notas]);
+        $cotizacione->update(['estatus' => 'rechazado']);
 
         Notificacion::create([
             'empresa_id' => $cotizacione->empresa_id,
@@ -243,11 +197,11 @@ class ClientePanelController extends Controller
 
     public function cotizaciones(Request $request)
     {
-        $user = auth()->user();
         $empresaId = session('empresa_id');
+        $clienteId = $this->clienteId();
 
         $query = Cotizacion::where('empresa_id', $empresaId)
-            ->where('usuario_creador_id', $user->id)
+            ->where('cliente_id', $clienteId)
             ->with('aseguradora', 'tipoServicio');
 
         if ($request->filled('q')) {

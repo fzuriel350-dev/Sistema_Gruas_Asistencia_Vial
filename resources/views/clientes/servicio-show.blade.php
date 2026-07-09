@@ -71,11 +71,11 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500 text-sm">Origen</span>
-                    <span class="text-sm text-right max-w-[60%]">{{ $servicio->cotizacion->origen }}</span>
+                    <span class="text-sm text-right max-w-[60%]">{{ $servicio->cotizacion->origen_direccion }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500 text-sm">Destino</span>
-                    <span class="text-sm text-right max-w-[60%]">{{ $servicio->cotizacion->destino }}</span>
+                    <span class="text-sm text-right max-w-[60%]">{{ $servicio->cotizacion->destino_direccion }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500 text-sm">Distancia</span>
@@ -83,7 +83,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500 text-sm">Vehículo</span>
-                    <span class="text-sm">{{ $servicio->cotizacion->marca }} {{ $servicio->cotizacion->modelo }} ({{ $servicio->cotizacion->placas }})</span>
+                    <span class="text-sm">{{ $servicio->cotizacion->marca ?? '—' }} {{ $servicio->cotizacion->modelo ?? '' }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500 text-sm">Fecha de creación</span>

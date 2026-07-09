@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cliente;
 use App\Models\Cotizacion;
 use App\Models\Servicio;
 use App\Models\Operador;
@@ -17,7 +18,25 @@ class DashboardController extends Controller
         $empresaId = session('empresa_id');
 
         if ($user->isCliente()) {
-            return redirect()->route('clientes.dashboard');
+            $clienteId = Cliente::where('usuario_id', $user->id)->value('id');
+
+            $cotizacionesPendientes = Cotizacion::where('empresa_id', $empresaId)
+                ->where('cliente_id', $clienteId)->where('estatus', 'pendiente')->count();
+            $serviciosActivos = 0;
+            $serviciosFinalizados = 0;
+            $servicioActivo = null;
+
+            if ($clienteId) {
+                $serviciosQuery = Servicio::where('empresa_id', $empresaId)
+                    ->whereHas('cotizacion', fn($q) => $q->where('cliente_id', $clienteId));
+                $serviciosActivos = (clone $serviciosQuery)->whereIn('estado', Servicio::ESTADOS_ACTIVOS)->count();
+                $serviciosFinalizados = (clone $serviciosQuery)->where('estado', 'finalizado')->count();
+                $servicioActivo = (clone $serviciosQuery)->whereIn('estado', Servicio::ESTADOS_ACTIVOS)
+                    ->with('cotizacion', 'operador.empleado')->first();
+            }
+
+            return view('dashboard', compact('cotizacionesPendientes', 'serviciosActivos', 'serviciosFinalizados', 'servicioActivo'))
+                ->with('role', 'cliente');
         }
 
         if ($user->isOperador()) {
@@ -54,8 +73,9 @@ class DashboardController extends Controller
         $actividades = $this->getActividadesRecientes($empresaId);
         $servicios = $this->getServiciosRecientes($empresaId);
         $dias = $this->getServiciosPorDia($empresaId);
+        $nuevosClientes = $this->getNuevosClientes($empresaId);
 
-        return view('dashboard', compact('stats', 'actividades', 'servicios', 'dias'))
+        return view('dashboard', compact('stats', 'actividades', 'servicios', 'dias', 'nuevosClientes'))
             ->with('role', 'admin');
     }
 
@@ -124,5 +144,21 @@ class DashboardController extends Controller
             ];
         }
         return $dias;
+    }
+
+    private function getNuevosClientes(int $empresaId): array
+    {
+        return User::where('empresa_id', $empresaId)
+            ->where('role', User::ROLE_CLIENTE)
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($u) => [
+                'name' => $u->name,
+                'email' => $u->email,
+                'time' => $u->created_at->diffForHumans(),
+                'created_at' => $u->created_at,
+            ])
+            ->toArray();
     }
 }

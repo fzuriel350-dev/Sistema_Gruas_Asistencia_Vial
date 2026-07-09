@@ -29,22 +29,43 @@ class EmpleadoController extends Controller
         return view('empleados.create', compact('oficinas'));
     }
 
+    protected function reglasBase(): array
+    {
+        return [
+            'nombre' => ['required', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
+            'apellido_paterno' => ['required', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
+            'apellido_materno' => ['nullable', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
+            'telefono' => ['nullable', 'string', 'max:20', 'regex:/^[\d\s\-\+\(\)]+$/'],
+            'direccion' => ['nullable', 'string', 'max:500'],
+            'oficina_id' => ['nullable', 'exists:oficinas,id'],
+            'puesto' => ['nullable', 'string', 'max:255'],
+            'sueldo_diario' => ['nullable', 'numeric', 'min:0'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'in:admin,cotizador,operador'],
+        ];
+    }
+
+    protected function mensajesBase(): array
+    {
+        return [
+            'nombre.required' => 'El nombre del empleado es obligatorio.',
+            'nombre.regex' => 'El nombre solo puede contener letras y espacios.',
+            'apellido_paterno.required' => 'El apellido paterno es obligatorio.',
+            'apellido_paterno.regex' => 'El apellido paterno solo puede contener letras y espacios.',
+            'apellido_materno.regex' => 'El apellido materno solo puede contener letras y espacios.',
+            'telefono.regex' => 'El teléfono solo puede contener números, guiones, paréntesis y signo +.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Ingresa un correo electrónico válido.',
+            'email.unique' => 'Este correo ya está registrado.',
+            'role.required' => 'Selecciona un rol para el empleado.',
+        ];
+    }
+
     public function store(Request $request)
     {
         $this->authorize('admin');
-        $data = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'apellido_materno' => 'nullable|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'nullable|string',
-            'oficina_id' => 'nullable|exists:oficinas,id',
-            'puesto' => 'nullable|string|max:255',
-            'sueldo_diario' => 'nullable|numeric|min:0',
-            'email' => 'required|email|unique:users,email',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|in:admin,cotizador,operador',
-        ]);
+        $data = $request->validate($this->reglasBase(), $this->mensajesBase());
 
         $empresaId = session('empresa_id');
 
@@ -100,19 +121,10 @@ class EmpleadoController extends Controller
     public function update(Request $request, Empleado $empleado)
     {
         $this->authorize('admin');
-        $data = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'apellido_materno' => 'nullable|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'nullable|string',
-            'oficina_id' => 'nullable|exists:oficinas,id',
-            'puesto' => 'nullable|string|max:255',
-            'sueldo_diario' => 'nullable|numeric|min:0',
-            'email' => 'required|email|unique:users,email,' . $empleado->usuario?->id,
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|in:admin,cotizador,operador',
-        ]);
+        $reglas = $this->reglasBase();
+        $reglas['email'] = ['required', 'email', 'max:255', 'unique:users,email,' . $empleado->usuario?->id];
+        $reglas['password'] = ['nullable', 'confirmed', Rules\Password::defaults()];
+        $data = $request->validate($reglas, $this->mensajesBase());
 
         $empleado->update([
             'nombre' => $data['nombre'],

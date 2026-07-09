@@ -12,7 +12,6 @@ class Convenio extends Model
 
     protected $fillable = [
         'empresa_id',
-        'cliente_id',
         'aseguradora_id',
         'nombre',
         'tipo',
@@ -29,11 +28,6 @@ class Convenio extends Model
     public function empresa()
     {
         return $this->belongsTo(Empresa::class);
-    }
-
-    public function cliente()
-    {
-        return $this->belongsTo(Cliente::class);
     }
 
     public function aseguradora()

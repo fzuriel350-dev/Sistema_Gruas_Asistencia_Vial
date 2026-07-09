@@ -43,6 +43,127 @@
 </svg>
 <p class="text-sm">No tienes servicios pendientes.</p>
 </div>
+</div>    @elseif ($role === 'cliente')        {{-- Dashboard Cliente --}}        <div class="welcome-banner rounded-xl p-6 lg:p-8 mb-6 relative overflow-hidden">
+<div class="absolute right-[-40px] top-[-40px] w-[220px] h-[220px] rounded-full" style="background: radial-gradient(circle, rgba(255,213,0,0.1) 0%, transparent 70%);"></div>
+<div class="absolute left-[60%] bottom-[-60px] w-[300px] h-[300px] rounded-full" style="background: radial-gradient(circle, rgba(255,213,0,0.05) 0%, transparent 70%);"></div>
+<div class="absolute left-0 bottom-0 w-full h-[3px]" style="background: linear-gradient(90deg, var(--geg-yellow), transparent);"></div>
+<div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<div>
+<h2 class="text-2xl font-bold text-white mb-1">Hola, <span style="color: var(--geg-yellow);">{{ Auth::user()->name }}</span></h2>
+<p class="text-sm text-white/50">Bienvenido a tu panel de control</p>
+</div>
+<div class="flex items-center gap-4 text-white/40 text-xs">
+<span class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+</svg>
+{{ now()->format('d/m/Y') }}
+</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+<div class="stat-card">
+<div class="stat-icon" style="background: linear-gradient(135deg, #FFF3B0, #FFE066); color: #B39500;">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+</svg>
+</div>
+<div class="stat-info">
+<div class="stat-value">{{ $cotizacionesPendientes }}</div>
+<div class="stat-label">Cotizaciones pendientes</div>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #059669;">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+</svg>
+</div>
+<div class="stat-info">
+<div class="stat-value">{{ $serviciosActivos }}</div>
+<div class="stat-label">Servicios activos</div>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #7c3aed;">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+</div>
+<div class="stat-info">
+<div class="stat-value">{{ $serviciosFinalizados }}</div>
+<div class="stat-label">Servicios finalizados</div>
+</div>
+</div>
+</div>
+@if ($servicioActivo)
+<div class="card mb-5">
+<div class="card-header">
+<h3>Servicio en curso</h3>
+<span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse-soft"></span>
+Activo
+</span>
+</div>
+<div class="card-body">
+<div class="flex items-center justify-between p-4 rounded-xl" style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5);">
+<div>
+<p class="text-sm text-gray-500 mb-0.5">Folio</p>
+<p class="font-bold text-gray-900">#{{ $servicioActivo->cotizacion->folio ?? '—' }}</p>
+</div>
+<div>
+<p class="text-sm text-gray-500 mb-0.5">Estado</p>
+<p class="font-semibold text-emerald-700 capitalize">{{ str_replace('_', ' ', $servicioActivo->estado ?? '—') }}</p>
+</div>
+<div>
+<p class="text-sm text-gray-500 mb-0.5">Operador</p>
+<p class="font-semibold text-gray-900">{{ $servicioActivo->operador->empleado->nombre ?? '—' }}</p>
+</div>
+<a href="{{ route('clientes.servicio-show', $servicioActivo) }}" class="btn btn-primary text-sm">Ver detalle</a>
+</div>
+</div>
+</div>
+@endif
+<div class="card">
+<div class="card-header"><h3>Accesos rápidos</h3></div>
+<div class="card-body">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<a href="{{ route('clientes.cotizaciones') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[#FFD500] hover:bg-[#FFFDF0] transition-all duration-200">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background: linear-gradient(135deg, #FFF3B0, #FFE066);">
+<svg class="w-6 h-6" style="color: #B39500;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+</svg>
+</div>
+<div>
+<div class="font-bold text-sm text-gray-800 group-hover:text-[#B39500] transition-colors">Mis cotizaciones</div>
+<div class="text-xs text-gray-500 mt-0.5">Ver y gestionar cotizaciones</div>
+</div>
+</a>
+<a href="{{ route('clientes.servicios') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[#FFD500] hover:bg-[#FFFDF0] transition-all duration-200">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0);">
+<svg class="w-6 h-6" style="color: #059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+</svg>
+</div>
+<div>
+<div class="font-bold text-sm text-gray-800 group-hover:text-[#B39500] transition-colors">Mis servicios</div>
+<div class="text-xs text-gray-500 mt-0.5">Dar seguimiento a tus servicios</div>
+</div>
+</a>
+<a href="{{ route('clientes.notificaciones') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[#FFD500] hover:bg-[#FFFDF0] transition-all duration-200">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
+<svg class="w-6 h-6" style="color: #D97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+</svg>
+</div>
+<div>
+<div class="font-bold text-sm text-gray-800 group-hover:text-[#B39500] transition-colors">Notificaciones</div>
+<div class="text-xs text-gray-500 mt-0.5">Ver tus notificaciones</div>
+</div>
+</a>
+</div>
+</div>
 </div>    @else        {{-- Dashboard Admin / Cotizador --}}        <div class="welcome-banner rounded-xl p-5 lg:p-7 flex items-center justify-between gap-5 mb-6 relative overflow-hidden">
 <div class="absolute right-[-40px] top-[-40px] w-[180px] h-[180px] rounded-full" style="background: radial-gradient(circle, rgba(255,213,0,0.08) 0%, transparent 70%);">
 </div>
@@ -54,8 +175,7 @@
 <p class="text-[13.5px] text-white/60">Hoy tienes <strong class="text-white/90">{{ $stats['servicios_activos'] }} servicios activos</strong> y <strong class="text-white/90">{{ $stats['cotizaciones_pendientes'] }} cotizaciones pendientes</strong> por revisar.</p>
 </div>
 <div class="flex gap-2.5 shrink-0 flex-wrap">
-<a href="#" class="btn btn-primary">+ Nueva cotización</a>
-<a href="#" class="btn btn-ghost">Ver reportes</a>
+<a href="{{ route('cotizaciones.index') }}" class="btn btn-primary">Ir a cotizaciones</a>
 </div>
 </div>        {{-- Stats --}}        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 <div class="stat-card">
@@ -173,22 +293,18 @@
 </div>
 <div class="card">
 <div class="card-header">
-<h3>Mapa de servicios</h3>
-<span class="text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5" style="background: #fee2e2; color: var(--geg-danger);">
-<span class="w-1.5 h-1.5 rounded-full bg-red-600" style="animation: pulse-dot 1.5s ease-in-out infinite;">
-</span>                        En vivo                    </span>
+<h3>Nuevos clientes registrados</h3>
+<a href="#" class="btn btn-sm btn-ghost-btn">Ver todos</a>
 </div>
-<div class="map-placeholder h-[220px] rounded-none" style="border-radius: 0 0 12px 12px;">
-<div class="map-grid">
+<div class="card-body py-2">                    @forelse ($nuevosClientes as $cliente)                        <div class="flex items-start gap-3 px-4 py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
+<div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold shrink-0">
+{{ substr($cliente['name'], 0, 2) }}
 </div>
-<div class="relative z-10 text-center">
-<svg class="w-8 h-8 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-</svg>
-<div class="text-sm font-semibold text-gray-600">4 servicios activos en CDMX</div>
-<div class="text-xs text-gray-500 mt-1">3 grúas en ruta · 1 en espera</div>
+<div class="flex-1 min-w-0">
+<div class="text-xs text-gray-800 font-medium">{{ $cliente['name'] }}</div>
+<div class="text-[11px] text-gray-500">{{ $cliente['email'] }}</div>
 </div>
-</div>
+<div class="text-[11px] text-gray-400 shrink-0">{{ $cliente['time'] }}</div>
+</div>                    @empty                        <div class="text-center py-8 text-gray-400 text-sm">Sin registros recientes</div>                    @endforelse                </div>
 </div>
 </div>    @endif    @push('scripts')    <style>        @keyframes pulse-dot {            0%, 100% { opacity: 1; }            50% { opacity: 0.3; }        }        .nav-active::before {            content: '';            position: absolute;            left: -10px;            top: 50%;            transform: translateY(-50%);            width: 3px;            height: 20px;            background: var(--geg-yellow);            border-radius: 0 3px 3px 0;        }        .nav-item {            position: relative;        }    </style>    @endpush</x-app-layout>

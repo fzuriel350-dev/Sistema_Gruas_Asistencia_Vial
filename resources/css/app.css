@@ -465,4 +465,34 @@
   .step-line-active {
     background: var(--geg-yellow);
   }
+
+  .swal-popup-custom {
+    border-radius: 1rem !important;
+    padding: 2rem 1.5rem 1.5rem !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+  }
+  .swal-title-custom {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+    padding-top: 0.5rem !important;
+  }
+  .swal-confirm-custom {
+    font-weight: 600 !important;
+    padding: 0.65rem 1.5rem !important;
+    border-radius: 0.625rem !important;
+    font-size: 0.875rem !important;
+  }
+  .swal-cancel-custom {
+    font-weight: 600 !important;
+    padding: 0.65rem 1.5rem !important;
+    border-radius: 0.625rem !important;
+    font-size: 0.875rem !important;
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
+    background: #f9fafb !important;
+  }
+  .swal-cancel-custom:hover {
+    background: #f3f4f6 !important;
+  }
 }

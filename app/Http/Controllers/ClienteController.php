@@ -45,19 +45,39 @@ class ClienteController extends Controller
         return view('clientes.create', compact('aseguradoras'));
     }
 
+    protected function reglasValidacion(): array
+    {
+        return [
+            'nombre' => ['required', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
+            'empresa' => ['nullable', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
+            'contacto' => ['nullable', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
+            'telefono' => ['nullable', 'string', 'max:20', 'regex:/^[\d\s\-\+\(\)]+$/'],
+            'direccion' => ['nullable', 'string', 'max:500'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'aseguradora_id' => ['nullable', 'exists:aseguradoras,id'],
+            'numero_poliza' => ['nullable', 'string', 'max:50'],
+            'tipo_cobertura_poliza' => ['nullable', 'string', 'max:100'],
+        ];
+    }
+
+    protected function mensajesValidacion(): array
+    {
+        return [
+            'nombre.required' => 'El nombre del cliente es obligatorio.',
+            'nombre.regex' => 'El nombre solo puede contener letras y espacios.',
+            'empresa.regex' => 'El nombre de la empresa solo puede contener letras y espacios.',
+            'contacto.regex' => 'El contacto solo puede contener letras y espacios.',
+            'telefono.regex' => 'El teléfono solo puede contener números, guiones, paréntesis y signo +.',
+            'numero_poliza.regex' => 'El número de póliza solo puede contener números, guiones, paréntesis y signo +.',
+            'email.email' => 'Ingresa un correo electrónico válido.',
+            'email.unique' => 'Este correo ya está registrado.',
+            'aseguradora_id.exists' => 'La aseguradora seleccionada no es válida.',
+        ];
+    }
+
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'empresa' => 'nullable|string|max:255',
-            'contacto' => 'nullable|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'nullable|string|max:500',
-            'email' => 'nullable|email|max:255',
-            'aseguradora_id' => 'nullable|exists:aseguradoras,id',
-            'numero_poliza' => 'nullable|string|max:50',
-            'tipo_cobertura_poliza' => 'nullable|string|max:100',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
 
         $data['empresa_id'] = session('empresa_id');
         Cliente::create($data);
@@ -82,17 +102,7 @@ class ClienteController extends Controller
 
     public function update(Request $request, Cliente $cliente)
     {
-        $data = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'empresa' => 'nullable|string|max:255',
-            'contacto' => 'nullable|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'nullable|string|max:500',
-            'email' => 'nullable|email|max:255',
-            'aseguradora_id' => 'nullable|exists:aseguradoras,id',
-            'numero_poliza' => 'nullable|string|max:50',
-            'tipo_cobertura_poliza' => 'nullable|string|max:100',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
 
         $cliente->update($data);
 

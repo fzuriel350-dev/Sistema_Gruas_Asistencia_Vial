@@ -100,11 +100,6 @@ class Empresa extends Model
         return $this->hasMany(Factura::class);
     }
 
-    public function controlNomina()
-    {
-        return $this->hasMany(ControlNomina::class);
-    }
-
     public function cotizaciones()
     {
         return $this->hasMany(Cotizacion::class);

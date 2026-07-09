@@ -27,19 +27,36 @@ class ServicioConfiguradoController extends Controller
         return view('servicios_configurados.create', compact('clientes', 'tipos'));
     }
 
+    protected function reglasValidacion(): array
+    {
+        return [
+            'cliente_id' => ['required', 'exists:clientes,id'],
+            'tipo_servicio_id' => ['required', 'exists:tipos_servicio,id'],
+            'nombre' => ['required', 'string', 'max:200', 'regex:/^[\p{L}\p{N}\s\.\-\/]+$/u'],
+            'tipo' => ['required', 'in:publico,aseguradora,particular'],
+            'costo_banderazo' => ['required', 'numeric', 'min:0'],
+            'costo_km' => ['required', 'numeric', 'min:0'],
+            'activo' => ['boolean'],
+            'observaciones' => ['nullable', 'string', 'max:1000'],
+        ];
+    }
+
+    protected function mensajesValidacion(): array
+    {
+        return [
+            'cliente_id.required' => 'Selecciona un cliente.',
+            'tipo_servicio_id.required' => 'Selecciona un tipo de servicio.',
+            'nombre.required' => 'El nombre del servicio es obligatorio.',
+            'tipo.required' => 'Selecciona el tipo de servicio.',
+            'costo_banderazo.required' => 'El costo de banderazo es obligatorio.',
+            'costo_km.required' => 'El costo por km es obligatorio.',
+        ];
+    }
+
     public function store(Request $request)
     {
         $this->authorize('admin');
-        $data = $request->validate([
-            'cliente_id' => 'required|exists:clientes,id',
-            'tipo_servicio_id' => 'required|exists:tipos_servicio,id',
-            'nombre' => 'required|string|max:200',
-            'tipo' => 'required|in:publico,aseguradora,particular',
-            'costo_banderazo' => 'required|numeric|min:0',
-            'costo_km' => 'required|numeric|min:0',
-            'activo' => 'boolean',
-            'observaciones' => 'nullable|string',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
         $data['empresa_id'] = session('empresa_id');
         $data['activo'] ??= true;
         ServicioConfigurado::create($data);
@@ -64,16 +81,7 @@ class ServicioConfiguradoController extends Controller
     public function update(Request $request, ServicioConfigurado $serviciosConfigurado)
     {
         $this->authorize('admin');
-        $data = $request->validate([
-            'cliente_id' => 'required|exists:clientes,id',
-            'tipo_servicio_id' => 'required|exists:tipos_servicio,id',
-            'nombre' => 'required|string|max:200',
-            'tipo' => 'required|in:publico,aseguradora,particular',
-            'costo_banderazo' => 'required|numeric|min:0',
-            'costo_km' => 'required|numeric|min:0',
-            'activo' => 'boolean',
-            'observaciones' => 'nullable|string',
-        ]);
+        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
         $data['activo'] ??= false;
         $serviciosConfigurado->update($data);
         return redirect()->route('servicios-configurados.index')->with('success', 'Servicio configurado actualizado correctamente.');

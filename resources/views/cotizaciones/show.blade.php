@@ -70,9 +70,17 @@
 <p class="font-semibold">{{ $cotizacione->incluye_peajes ? 'Sí' : 'No' }}</p>
 </div>
 </div>
-</div>
-</div>
-<div class="text-xs text-gray-400 flex gap-4">
+                </div>
+            </div>
+            @if ($cotizacione->notas)
+            <div class="card">
+                <div class="card-header"><h3>Observaciones</h3></div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-600 whitespace-pre-wrap">{{ $cotizacione->notas }}</p>
+                </div>
+            </div>
+            @endif
+            <div class="text-xs text-gray-400 flex gap-4">
 <span>Creado por: {{ $cotizacione->creador?->name }}</span>
 <span>{{ $cotizacione->created_at->format('d/m/Y H:i') }}</span>
 </div>
