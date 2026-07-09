@@ -28,9 +28,28 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        session(['empresa_id' => Auth::user()->empresa_id]);
+        // 1. Obtener el usuario que acaba de iniciar sesión
+        $user = auth()->user();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // 2. Redirección específica basándose en la columna 'role' del modelo User
+        if ($user->role === 'admin') {
+            return redirect()->intended(route('dashboard'));
+        } 
+        
+        if ($user->role === 'cotizador') {
+            return redirect()->intended(route('cotizaciones.index'));
+        } 
+        
+        if ($user->role === 'cliente') {
+            return redirect()->intended(route('clientes.servicios'));
+        } 
+        
+        if ($user->role === 'operador') {
+            return redirect()->intended(route('operadores.index'));
+        }
+
+        // Redirección por defecto si el rol no coincide con ninguno de los anteriores
+        return redirect()->intended(route('dashboard'));
     }
 
     /**
@@ -44,6 +63,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Forzar redirección limpia a la pantalla de login al salir
+        return redirect('/login');
     }
 }

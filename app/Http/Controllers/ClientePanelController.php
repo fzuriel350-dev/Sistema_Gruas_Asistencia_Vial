@@ -34,7 +34,7 @@ class ClientePanelController extends Controller
         $clienteId = $this->clienteId();
 
         if (!$clienteId) {
-            $servicios = collect([]);
+            $servicios = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
             return view('clientes.servicios', compact('servicios'));
         }
 
