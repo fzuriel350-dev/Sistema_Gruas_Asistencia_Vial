@@ -51,7 +51,7 @@
 <span x-show="!mostrarDesc">+ Especificar problema</span>
 <span x-show="mostrarDesc">- Ocultar descripción</span>
 </button>
-<div x-show="mostrarDesc" x-collapse class="mt-2">
+<div x-show="mostrarDesc" class="mt-2">
 <textarea name="descripcion" rows="2" class="form-input" placeholder="Describe el problema del vehículo...">{{ old('descripcion', $servicio->descripcion) }}</textarea>
 <x-input-error :messages="$errors->get('descripcion')" />
 </div>
@@ -134,4 +134,4 @@
 </form>
 </div>
 </div>
-</div>@push('scripts')<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>@endpush@endsection
+</div>@endsection
