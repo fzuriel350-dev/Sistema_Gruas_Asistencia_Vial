@@ -11,6 +11,15 @@
             <form method="POST" action="{{ route('usuarios.update', $usuario) }}" class="form-grid">
                 @csrf @method('PUT')
 
+                <div class="col-span-full">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-6 h-6 rounded-md bg-[var(--geg-yellow)]/15 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5 text-[var(--geg-yellow)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                        </div>
+                        <span class="text-sm font-bold text-gray-700">Rol y Acceso</span>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="name">Nombre</label>
                     <input id="name" name="name" type="text" value="{{ old('name', $usuario->name) }}" required>
@@ -23,10 +32,11 @@
                     <x-input-error :messages="$errors->get('email')" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-span-full">
                     <label for="role">Rol</label>
-                    <select id="role" name="role" required onchange="toggleRoleFields(this.value)">
-                        <option value="admin" @selected(old('role', $usuario->role) === 'admin')>Admin</option>
+                    <select id="role" name="role" required onchange="cambiarRol(this.value)">
+                        <option value="">Seleccionar rol...</option>
+                        <option value="admin" @selected(old('role', $usuario->role) === 'admin')>Administrador</option>
                         <option value="cotizador" @selected(old('role', $usuario->role) === 'cotizador')>Cotizador</option>
                         <option value="operador" @selected(old('role', $usuario->role) === 'operador')>Operador</option>
                         <option value="cliente" @selected(old('role', $usuario->role) === 'cliente')>Cliente</option>
@@ -34,63 +44,41 @@
                     <x-input-error :messages="$errors->get('role')" />
                 </div>
 
-                <div class="form-group" id="empleadoField" @if($usuario->role === 'cliente') style="display:none" @endif>
-                    <label for="empleado_id">Empleado vinculado</label>
-                    <select id="empleado_id" name="empleado_id" onchange="toggleNuevoEmpleado(this.value)">
-                        <option value="">Seleccionar...</option>
-                        @foreach ($empleados as $empleado)
-                        <option value="{{ $empleado->id }}" @selected(old('empleado_id', $usuario->empleado_id) == $empleado->id)>
-                            {{ $empleado->nombreCompleto() }} {{ $empleado->puesto ? '(' . $empleado->puesto . ')' : '' }}
-                        </option>
-                        @endforeach
-                        <option value="__nuevo__">+ Crear nuevo empleado</option>
-                    </select>
-                    <x-input-error :messages="$errors->get('empleado_id')" />
-                </div>
-
-                <div id="nuevoEmpleadoFields" style="display:none" class="form-grid col-span-full">
-                    <hr class="border-gray-200 my-2 col-span-full">
-                    <p class="text-sm text-gray-500 font-medium col-span-full">Nuevo empleado</p>
-
-                    <div class="form-group">
-                        <label for="emp_nombre">Nombre(s)</label>
-                        <input id="emp_nombre" name="emp_nombre" type="text" value="{{ old('emp_nombre') }}">
-                        <x-input-error :messages="$errors->get('emp_nombre')" />
+                {{-- ═══════ EMPLEADO VINCULADO (no cliente) ═══════ --}}
+                <div id="seccionEmpleado" style="display:none">
+                    <hr class="border-gray-200 my-1 col-span-full">
+                    <div class="col-span-full">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-6 h-6 rounded-md bg-purple-500/15 flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            </div>
+                            <span class="text-sm font-bold text-gray-700">Empleado vinculado</span>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="emp_apellido_paterno">Apellido Paterno</label>
-                        <input id="emp_apellido_paterno" name="emp_apellido_paterno" type="text" value="{{ old('emp_apellido_paterno') }}">
-                        <x-input-error :messages="$errors->get('emp_apellido_paterno')" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="emp_apellido_materno">Apellido Materno</label>
-                        <input id="emp_apellido_materno" name="emp_apellido_materno" type="text" value="{{ old('emp_apellido_materno') }}">
-                        <x-input-error :messages="$errors->get('emp_apellido_materno')" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="emp_telefono">Teléfono</label>
-                        <input id="emp_telefono" name="emp_telefono" type="text" value="{{ old('emp_telefono') }}">
-                        <x-input-error :messages="$errors->get('emp_telefono')" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="emp_puesto">Puesto</label>
-                        <input id="emp_puesto" name="emp_puesto" type="text" value="{{ old('emp_puesto') }}" placeholder="Operador">
-                        <x-input-error :messages="$errors->get('emp_puesto')" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="emp_direccion">Dirección</label>
-                        <textarea id="emp_direccion" name="emp_direccion" rows="2">{{ old('emp_direccion') }}</textarea>
-                        <x-input-error :messages="$errors->get('emp_direccion')" />
+                    <div class="form-group col-span-full">
+                        <label for="empleado_id">Seleccionar empleado</label>
+                        <select id="empleado_id" name="empleado_id">
+                            <option value="">Sin empleado</option>
+                            @foreach ($empleados as $empleado)
+                            <option value="{{ $empleado->id }}" @selected(old('empleado_id', $usuario->empleado_id) == $empleado->id)>{{ $empleado->nombreCompleto() }} {{ $empleado->puesto ? '(' . $empleado->puesto . ')' : '' }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Si el empleado no existe, créalo desde <a href="{{ route('empleados.create') }}" class="text-[var(--geg-yellow)] hover:underline font-medium">Empleados → Nuevo</a></p>
+                        <x-input-error :messages="$errors->get('empleado_id')" />
                     </div>
                 </div>
 
-                <hr class="border-gray-200 my-2">
-                <p class="text-sm text-gray-500 font-medium">Cambiar contraseña <span class="text-gray-400 text-xs">(dejar vacío para mantener)</span></p>
+                <hr class="border-gray-200 my-1 col-span-full">
+                <div class="col-span-full">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-6 h-6 rounded-md bg-emerald-500/15 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                        </div>
+                        <span class="text-sm font-bold text-gray-700">Contraseña</span>
+                        <span class="text-gray-400 text-xs">(dejar vacío para mantener)</span>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label for="password">Nueva contraseña</label>
@@ -104,7 +92,7 @@
                     <x-input-error :messages="$errors->get('password_confirmation')" />
                 </div>
 
-                <div class="flex items-center gap-3 pt-2">
+                <div class="flex items-center gap-3 pt-2 col-span-full">
                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
                     <a href="{{ route('usuarios.index') }}" class="btn btn-ghost">Cancelar</a>
                 </div>
@@ -112,24 +100,23 @@
         </div>
     </div>
 </div>
+@endsection
 
 @push('scripts')
 <script>
-function toggleRoleFields(role) {
-    const field = document.getElementById('empleadoField');
-    const nuevo = document.getElementById('nuevoEmpleadoFields');
-    if (role === 'cliente') {
-        field.style.display = 'none';
-        nuevo.style.display = 'none';
+function cambiarRol(rol) {
+    var seccionEmp = document.getElementById('seccionEmpleado');
+    if (rol === 'admin' || rol === 'cotizador' || rol === 'operador') {
+        seccionEmp.style.display = '';
     } else {
-        field.style.display = '';
-        toggleNuevoEmpleado(document.getElementById('empleado_id').value);
+        seccionEmp.style.display = 'none';
     }
 }
-
-function toggleNuevoEmpleado(val) {
-    document.getElementById('nuevoEmpleadoFields').style.display = (val === '__nuevo__') ? '' : 'none';
-}
+window.addEventListener('DOMContentLoaded', function() {
+    var select = document.getElementById('role');
+    if (select && select.value) {
+        cambiarRol(select.value);
+    }
+});
 </script>
 @endpush
-@endsection

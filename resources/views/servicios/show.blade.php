@@ -23,6 +23,16 @@
     <button type="button" class="btn btn-primary" style="background:#16a34a;" onclick="asignarOperador({{ $servicio->id }})">Asignar operador</button>
     @endif
 @endif
+@if ($servicio->estado === 'finalizado' && !$servicio->factura && auth()->user()->isAdmin())
+<form method="POST" action="{{ route('servicios.generar-factura', $servicio) }}" class="inline" onsubmit="return confirm('¿Generar factura para este servicio?')">
+    @csrf
+    <button type="submit" class="btn btn-primary" style="background:#16a34a;">Generar Factura</button>
+</form>
+@endif
+@if ($servicio->factura && auth()->user()->isAdmin())
+<a href="{{ route('facturas.show', $servicio->factura) }}" class="btn btn-primary" style="background:#7c3aed;">Ver Factura</a>
+<a href="{{ route('facturas.descargar-pdf', $servicio->factura) }}" class="btn btn-primary" style="background:#2563eb;" target="_blank">Descargar PDF</a>
+@endif
 </div>
 </div>
 <div class="card mb-5">
@@ -55,7 +65,7 @@ $pasos = [
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $paso['icon'] }}" />
 </svg>
 </div>
-<span class="text-[11px] mt-1.5 font-medium {{ $completado ? 'text-gray-800' : ($actual ? 'text-[#FFD500]' : 'text-gray-400') }}">
+<span class="text-[11px] mt-1.5 font-medium {{ $completado ? 'text-gray-800' : ($actual ? 'text-[var(--geg-yellow)]' : 'text-gray-400') }}">
 {{ $paso['label'] }}
 </span>
 @if (!$loop->last)
@@ -157,6 +167,16 @@ $pasos = [
 <span class="text-gray-500">Costo final real</span>
 <p class="font-semibold">${{ $servicio->costo_final_real ? number_format($servicio->costo_final_real, 2) : '—' }}</p>
 </div>
+@if ($servicio->cargos_extras > 0)
+<div class="col-span-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-amber-700">Cargo extra KM: ${{ number_format($servicio->cargos_extras, 2) }}</span>
+</div>
+@if ($servicio->motivo_cargos_extras)
+<p class="text-xs text-gray-500 mt-1">{{ $servicio->motivo_cargos_extras }}</p>
+@endif
+</div>
+@endif
 </div>
 </div>
 </div>

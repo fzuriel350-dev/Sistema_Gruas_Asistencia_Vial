@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Servicio;
 use App\Models\Cotizacion;
+use App\Models\Factura;
 use App\Models\Operador;
 use App\Models\TipoServicio;
 use App\Models\Unidad;
@@ -12,6 +13,8 @@ use App\Models\AutorizacionCancelacion;
 use App\Models\Notificacion;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class ServicioController extends Controller
 {
@@ -96,6 +99,8 @@ class ServicioController extends Controller
             'kms_regreso_base' => ['nullable', 'integer', 'min:0'],
             'kms_cobrados_reales' => ['nullable', 'integer', 'min:0'],
             'costo_final_real' => ['nullable', 'numeric', 'min:0'],
+            'cargos_extras' => ['nullable', 'numeric', 'min:0'],
+            'motivo_cargos_extras' => ['nullable', 'string', 'max:500'],
             'observaciones' => ['nullable', 'string', 'max:1000'],
         ];
     }
@@ -132,9 +137,36 @@ class ServicioController extends Controller
         $data = $request->validate($this->reglasStore(), $this->mensajesStore());
         $data['empresa_id'] = session('empresa_id');
         $data['estado'] = 'asignado';
-        Servicio::create($data);
+        $servicio = Servicio::create($data);
 
         Operador::where('id', $data['operador_id'])->update(['disponible' => false]);
+
+        $empleados = User::where('empresa_id', session('empresa_id'))
+            ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_COTIZADOR])
+            ->get();
+
+        foreach ($empleados as $emp) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $emp->id,
+                'mensaje' => "Servicio #{$servicio->id} creado y asignado al operador.",
+                'tipo' => 'servicio',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$emp->id}");
+        }
+
+        $cotizacion = $servicio->cotizacion;
+        if ($cotizacion && $cotizacion->usuario_creador_id) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $cotizacion->usuario_creador_id,
+                'mensaje' => "Tu servicio #{$servicio->id} ha sido creado. Folio cotización: {$cotizacion->folio}.",
+                'tipo' => 'servicio',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$cotizacion->usuario_creador_id}");
+        }
 
         return redirect()->route('servicios.index')->with('success', 'Servicio creado correctamente.');
     }
@@ -260,12 +292,48 @@ class ServicioController extends Controller
             $cotizacion = $servicio->cotizacion;
             $costoCalculado = $cotizacion->costo_banderazo
                 + ($data['kms_cobrados_reales'] * $cotizacion->costo_km)
-                + ($cotizacion->incluye_peajes ? $cotizacion->costo_aprox_casetas : 0);
+                + ($cotizacion->incluye_peajes ? $cotizacion->costo_aprox_casetas : 0)
+                + ($servicio->cargos_extras ?? 0);
             $updateData['costo_final_real'] = $costoCalculado;
             Operador::where('id', $servicio->operador_id)->update(['disponible' => true]);
         }
 
         $servicio->update($updateData);
+
+        $notificarEstados = ['inicio_servicio', 'finalizado'];
+        if (in_array($nuevoEstado, $notificarEstados)) {
+            $mensajeMap = [
+                'inicio_servicio' => "El servicio #{$servicio->id} ha iniciado.",
+                'finalizado' => "El servicio #{$servicio->id} ha sido finalizado.",
+            ];
+
+            $empleados = User::where('empresa_id', session('empresa_id'))
+                ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_COTIZADOR])
+                ->get();
+
+            foreach ($empleados as $emp) {
+                Notificacion::create([
+                    'empresa_id' => session('empresa_id'),
+                    'usuario_id' => $emp->id,
+                    'mensaje' => $mensajeMap[$nuevoEstado],
+                    'tipo' => 'servicio',
+                    'estado' => 'no_leida',
+                ]);
+                Cache::forget("notificaciones_no_leidas_{$emp->id}");
+            }
+
+            $cotizacion = $servicio->cotizacion;
+            if ($cotizacion && $cotizacion->usuario_creador_id) {
+                Notificacion::create([
+                    'empresa_id' => session('empresa_id'),
+                    'usuario_id' => $cotizacion->usuario_creador_id,
+                    'mensaje' => $mensajeMap[$nuevoEstado],
+                    'tipo' => 'servicio',
+                    'estado' => 'no_leida',
+                ]);
+                Cache::forget("notificaciones_no_leidas_{$cotizacion->usuario_creador_id}");
+            }
+        }
 
         $mensajes = [
             'inicio_servicio' => '✅ Servicio iniciado. Kilometraje de salida registrado.',
@@ -396,6 +464,33 @@ class ServicioController extends Controller
             'estado' => 'no_leida',
         ]);
 
+        $empleados = User::where('empresa_id', session('empresa_id'))
+            ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_COTIZADOR])
+            ->get();
+
+        foreach ($empleados as $emp) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $emp->id,
+                'mensaje' => "Operador {$operador->empleado?->nombre} asignado al servicio #{$servicio->id}.",
+                'tipo' => 'servicio',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$emp->id}");
+        }
+
+        $cotizacion = $servicio->cotizacion;
+        if ($cotizacion && $cotizacion->usuario_creador_id) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $cotizacion->usuario_creador_id,
+                'mensaje' => "Operador {$operador->empleado?->nombre} fue asignado a tu servicio #{$servicio->id}.",
+                'tipo' => 'servicio',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$cotizacion->usuario_creador_id}");
+        }
+
         return redirect()->route('servicios.show', $servicio)
             ->with('success', "Operador {$operador->empleado?->nombre} asignado al servicio.");
     }
@@ -433,6 +528,18 @@ class ServicioController extends Controller
             'fecha_resolucion' => now(),
         ]);
 
+        $cotizacion = $servicio->cotizacion;
+        if ($cotizacion && $cotizacion->usuario_creador_id) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $cotizacion->usuario_creador_id,
+                'mensaje' => "Tu servicio #{$servicio->id} fue cancelado. Motivo: {$data['motivo_cancelacion']}.",
+                'tipo' => 'servicio',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$cotizacion->usuario_creador_id}");
+        }
+
         return redirect()->route('servicios.index')->with('success', 'Servicio cancelado correctamente.');
     }
 
@@ -447,5 +554,70 @@ class ServicioController extends Controller
         }
         $servicio->delete();
         return redirect()->route('servicios.index')->with('success', 'Servicio eliminado.');
+    }
+
+    public function generarFactura(Servicio $servicio)
+    {
+        $this->authorize('admin');
+
+        if ($servicio->estado !== 'finalizado') {
+            return back()->with('error', 'Solo se pueden generar facturas de servicios finalizados.');
+        }
+
+        if ($servicio->factura) {
+            return back()->with('error', 'Este servicio ya tiene una factura generada.');
+        }
+
+        $cotizacion = $servicio->cotizacion;
+        $cliente = $cotizacion?->cliente;
+
+        if (!$cliente) {
+            return back()->with('error', 'No se encontró el cliente asociado al servicio.');
+        }
+
+        $subtotal = $servicio->costo_final_real ?? 0;
+        $iva = round($subtotal * 0.16, 2);
+        $total = round($subtotal + $iva, 2);
+
+        $folio = 'FAC-' . strtoupper(Str::random(8));
+
+        Factura::create([
+            'empresa_id' => session('empresa_id'),
+            'cliente_id' => $cliente->id,
+            'servicio_id' => $servicio->id,
+            'folio_factura' => $folio,
+            'subtotal' => $subtotal,
+            'iva' => $iva,
+            'total' => $total,
+            'estatus' => 'vigente',
+        ]);
+
+        $empleados = User::where('empresa_id', session('empresa_id'))
+            ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_COTIZADOR])
+            ->get();
+
+        foreach ($empleados as $emp) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $emp->id,
+                'mensaje' => "Factura {$folio} generada para el servicio #{$servicio->id}. Total: \${$total}.",
+                'tipo' => 'factura',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$emp->id}");
+        }
+
+        if ($cotizacion && $cotizacion->usuario_creador_id) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $cotizacion->usuario_creador_id,
+                'mensaje' => "Factura {$folio} generada para tu servicio #{$servicio->id}. Total: \${$total}.",
+                'tipo' => 'factura',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$cotizacion->usuario_creador_id}");
+        }
+
+        return redirect()->route('servicios.show', $servicio)->with('success', 'Factura generada correctamente.');
     }
 }

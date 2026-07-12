@@ -74,33 +74,15 @@ class UserController extends Controller
             'role' => ['required', 'in:admin,cotizador,operador,cliente'],
             'empleado_id' => ['nullable', 'string'],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-            'emp_nombre' => ['nullable', 'required_if:empleado_id,__nuevo__', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
-            'emp_apellido_paterno' => ['nullable', 'required_if:empleado_id,__nuevo__', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
-            'emp_apellido_materno' => ['nullable', 'string', 'max:255', 'regex:/^[\p{L}\s]+$/u'],
-            'emp_telefono' => ['nullable', 'string', 'max:20', 'regex:/^[\d\s\-\+\(\)]+$/'],
-            'emp_puesto' => ['nullable', 'string', 'max:255'],
-            'emp_direccion' => ['nullable', 'string', 'max:500'],
         ]);
 
         $isEmployee = in_array($data['role'], ['admin', 'cotizador', 'operador']);
 
         if ($isEmployee) {
-            if ($data['empleado_id'] === '__nuevo__') {
-                $empleado = Empleado::create([
-                    'empresa_id' => $empresaId,
-                    'nombre' => $data['emp_nombre'],
-                    'apellido_paterno' => $data['emp_apellido_paterno'],
-                    'apellido_materno' => $data['emp_apellido_materno'] ?? '',
-                    'telefono' => $data['emp_telefono'] ?? '',
-                    'puesto' => $data['emp_puesto'] ?? '',
-                    'direccion' => $data['emp_direccion'] ?? '',
-                ]);
-                $data['empleado_id'] = $empleado->id;
-            } elseif (!$data['empleado_id']) {
-                return back()->withErrors(['empleado_id' => 'Debes seleccionar o crear un empleado para roles administrativos.'])->withInput();
-            } else {
-                $data['empleado_id'] = (int) $data['empleado_id'];
+            if (!$data['empleado_id']) {
+                return back()->withErrors(['empleado_id' => 'Debes seleccionar un empleado para este rol.'])->withInput();
             }
+            $data['empleado_id'] = (int) $data['empleado_id'];
         } else {
             $data['empleado_id'] = null;
         }
@@ -131,5 +113,34 @@ class UserController extends Controller
         }
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
+    }
+
+    public function destroy(User $usuario)
+    {
+        $empresaId = session('empresa_id');
+
+        if ($usuario->empresa_id !== $empresaId) {
+            abort(403);
+        }
+
+        if ($usuario->id === auth()->id()) {
+            abort(403, 'No puedes eliminar tu propia cuenta.');
+        }
+
+        $empleado = $usuario->empleado;
+
+        $usuario->delete();
+
+        if ($empleado && !$empleado->usuario) {
+            if ($empleado->operador) {
+                $empleado->operador->delete();
+            }
+            if ($empleado->cotizador) {
+                $empleado->cotizador->delete();
+            }
+            $empleado->delete();
+        }
+
+        return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado correctamente.');
     }
 }

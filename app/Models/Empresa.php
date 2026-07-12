@@ -80,19 +80,9 @@ class Empresa extends Model
         return $this->hasMany(TipoServicio::class);
     }
 
-    public function serviciosConfigurados()
-    {
-        return $this->hasMany(ServicioConfigurado::class);
-    }
-
     public function oficinas()
     {
         return $this->hasMany(Oficina::class);
-    }
-
-    public function cargasDiesel()
-    {
-        return $this->hasMany(CargaDiesel::class);
     }
 
     public function facturas()

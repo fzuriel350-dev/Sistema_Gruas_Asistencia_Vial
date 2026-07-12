@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cotizador;
 use App\Models\Empleado;
+use App\Models\Operador;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -39,10 +41,13 @@ class EmpleadoController extends Controller
             'direccion' => ['nullable', 'string', 'max:500'],
             'oficina_id' => ['nullable', 'exists:oficinas,id'],
             'puesto' => ['nullable', 'string', 'max:255'],
-            'sueldo_diario' => ['nullable', 'numeric', 'min:0'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => ['required', 'in:admin,cotizador,operador'],
+            'licencia_tipo' => ['nullable', 'string', 'in:A,B,C,D'],
+            'licencia_año_vencimiento' => ['nullable', 'date'],
+            'licencia_vencimiento_federal' => ['nullable', 'date'],
+            'zona_cobertura' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -78,7 +83,6 @@ class EmpleadoController extends Controller
             'direccion' => $data['direccion'] ?? '',
             'oficina_id' => $data['oficina_id'] ?? null,
             'puesto' => $data['puesto'] ?? '',
-            'sueldo_diario' => $data['sueldo_diario'] ?? 0,
         ]);
 
         $user = User::create([
@@ -91,10 +95,22 @@ class EmpleadoController extends Controller
         ]);
 
         if ($data['role'] === 'operador') {
-            \App\Models\Operador::create([
+            Operador::create([
                 'empresa_id' => $empresaId,
                 'empleado_id' => $empleado->id,
+                'licencia_tipo' => $data['licencia_tipo'] ?? null,
+                'licencia_año_vencimiento' => $data['licencia_año_vencimiento'] ?? null,
+                'licencia_vencimiento_federal' => $data['licencia_vencimiento_federal'] ?? null,
                 'disponible' => true,
+            ]);
+        }
+
+        if ($data['role'] === 'cotizador') {
+            Cotizador::create([
+                'empresa_id' => $empresaId,
+                'empleado_id' => $empleado->id,
+                'zona_cobertura' => $data['zona_cobertura'] ?? null,
+                'activo' => true,
             ]);
         }
 
@@ -104,14 +120,14 @@ class EmpleadoController extends Controller
     public function show(Empleado $empleado)
     {
         $this->authorize('admin');
-        $empleado->load('usuario', 'operador', 'oficina');
+        $empleado->load('usuario', 'operador', 'cotizador', 'oficina');
         return view('empleados.show', compact('empleado'));
     }
 
     public function edit(Empleado $empleado)
     {
         $this->authorize('admin');
-        $empleado->load('usuario');
+        $empleado->load('usuario', 'operador', 'cotizador');
         $oficinas = \App\Models\Oficina::where('empresa_id', session('empresa_id'))
             ->orderBy('nombre')
             ->get();
@@ -134,7 +150,6 @@ class EmpleadoController extends Controller
             'direccion' => $data['direccion'] ?? '',
             'oficina_id' => $data['oficina_id'] ?? null,
             'puesto' => $data['puesto'] ?? '',
-            'sueldo_diario' => $data['sueldo_diario'] ?? 0,
         ]);
 
         if ($empleado->usuario) {
@@ -149,6 +164,48 @@ class EmpleadoController extends Controller
             $empleado->usuario->update($userData);
         }
 
+        if ($data['role'] === 'operador') {
+            $opData = [
+                'licencia_tipo' => $data['licencia_tipo'] ?? null,
+                'licencia_año_vencimiento' => $data['licencia_año_vencimiento'] ?? null,
+                'licencia_vencimiento_federal' => $data['licencia_vencimiento_federal'] ?? null,
+            ];
+            if ($empleado->operador) {
+                $empleado->operador->update($opData);
+            } else {
+                Operador::create(array_merge($opData, [
+                    'empresa_id' => session('empresa_id'),
+                    'empleado_id' => $empleado->id,
+                    'disponible' => true,
+                ]));
+            }
+        } elseif ($empleado->operador) {
+            $empleado->operador->update([
+                'licencia_tipo' => null,
+                'licencia_año_vencimiento' => null,
+                'licencia_vencimiento_federal' => null,
+            ]);
+        }
+
+        if ($data['role'] === 'cotizador') {
+            $cotData = [
+                'zona_cobertura' => $data['zona_cobertura'] ?? null,
+            ];
+            if ($empleado->cotizador) {
+                $empleado->cotizador->update($cotData);
+            } else {
+                Cotizador::create(array_merge($cotData, [
+                    'empresa_id' => session('empresa_id'),
+                    'empleado_id' => $empleado->id,
+                    'activo' => true,
+                ]));
+            }
+        } elseif ($empleado->cotizador) {
+            $empleado->cotizador->update([
+                'zona_cobertura' => null,
+            ]);
+        }
+
         return redirect()->route('empleados.index')->with('success', 'Empleado actualizado correctamente.');
     }
 
@@ -160,6 +217,9 @@ class EmpleadoController extends Controller
         }
         if ($empleado->operador) {
             $empleado->operador->delete();
+        }
+        if ($empleado->cotizador) {
+            $empleado->cotizador->delete();
         }
         $empleado->delete();
         return redirect()->route('empleados.index')->with('success', 'Empleado eliminado.');

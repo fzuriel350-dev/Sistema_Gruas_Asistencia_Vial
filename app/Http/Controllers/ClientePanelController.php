@@ -9,6 +9,7 @@ use App\Models\Servicio;
 use App\Models\Notificacion;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class ClientePanelController extends Controller
@@ -110,6 +111,21 @@ class ClientePanelController extends Controller
             'fecha_solicitud' => now(),
         ]);
 
+        $empleados = User::where('empresa_id', session('empresa_id'))
+            ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_COTIZADOR])
+            ->get();
+
+        foreach ($empleados as $emp) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $emp->id,
+                'mensaje' => "El cliente solicitó cancelar el servicio #{$servicio->id}. Motivo: {$request->motivo}.",
+                'tipo' => 'servicio',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$emp->id}");
+        }
+
         return redirect()->route('clientes.servicio-show', $servicio)
             ->with('success', 'Solicitud de cancelación enviada. Un administrador la revisará pronto.');
     }
@@ -130,15 +146,18 @@ class ClientePanelController extends Controller
     public function notificacionLeer(Notificacion $notificacione)
     {
         $notificacione->update(['estado' => 'leida']);
+        Cache::forget("notificaciones_no_leidas_" . auth()->id());
         return back()->with('success', 'Notificación marcada como leída.');
     }
 
     public function notificacionesLeerTodas()
     {
         $user = auth()->user();
-        Notificacion::where('usuario_id', $user->id)
+        Notificacion::where('empresa_id', session('empresa_id'))
+            ->where('usuario_id', $user->id)
             ->where('estado', 'no_leida')
             ->update(['estado' => 'leida']);
+        Cache::forget("notificaciones_no_leidas_" . $user->id);
         return back()->with('success', 'Todas las notificaciones marcadas como leídas.');
     }
 
@@ -167,6 +186,21 @@ class ClientePanelController extends Controller
             'estado' => 'no_leida',
         ]);
 
+        $empleados = User::where('empresa_id', $cotizacione->empresa_id)
+            ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_COTIZADOR])
+            ->get();
+
+        foreach ($empleados as $emp) {
+            Notificacion::create([
+                'empresa_id' => $cotizacione->empresa_id,
+                'usuario_id' => $emp->id,
+                'mensaje' => "El cliente aprobó la cotización {$cotizacione->folio}. Se generó un servicio.",
+                'tipo' => 'cotizacion_aprobada',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$emp->id}");
+        }
+
         return redirect()->route('clientes.servicios')
             ->with('success', 'Cotización aprobada. Servicio generado correctamente.');
     }
@@ -190,6 +224,21 @@ class ClientePanelController extends Controller
             'tipo' => 'cotizacion_rechazada',
             'estado' => 'no_leida',
         ]);
+
+        $empleados = User::where('empresa_id', $cotizacione->empresa_id)
+            ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_COTIZADOR])
+            ->get();
+
+        foreach ($empleados as $emp) {
+            Notificacion::create([
+                'empresa_id' => $cotizacione->empresa_id,
+                'usuario_id' => $emp->id,
+                'mensaje' => "El cliente rechazó la cotización {$cotizacione->folio}.",
+                'tipo' => 'cotizacion_rechazada',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$emp->id}");
+        }
 
         return redirect()->route('clientes.cotizaciones')
             ->with('success', 'Cotización rechazada.');

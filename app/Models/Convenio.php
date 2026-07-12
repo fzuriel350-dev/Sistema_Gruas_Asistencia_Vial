@@ -13,6 +13,7 @@ class Convenio extends Model
     protected $fillable = [
         'empresa_id',
         'aseguradora_id',
+        'tipo_servicio_id',
         'nombre',
         'tipo',
         'costo_banderazo',
@@ -35,8 +36,13 @@ class Convenio extends Model
         return $this->belongsTo(Aseguradora::class);
     }
 
+    public function tipoServicio()
+    {
+        return $this->belongsTo(TipoServicio::class);
+    }
+
     public function cotizaciones()
     {
-        return $this->hasMany(Cotizacion::class);
+        return $this->hasMany(Cotizacion::class, 'convenio_aplicado_id');
     }
 }

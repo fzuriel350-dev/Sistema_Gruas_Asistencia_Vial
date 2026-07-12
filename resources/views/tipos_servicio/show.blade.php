@@ -13,13 +13,6 @@
 <div class="stat-label">Cotizaciones</div>
 </div>
 </div>
-<div class="stat-card">
-<div class="stat-icon bg-blue-50">⚙️</div>
-<div>
-<div class="stat-value">{{ $tiposServicio->servicios_configurados_count }}</div>
-<div class="stat-label">Servicios configurados</div>
-</div>
-</div>
 </div>
 <div class="card">
 <div class="card-header"><h3>Datos del tipo de servicio</h3></div>

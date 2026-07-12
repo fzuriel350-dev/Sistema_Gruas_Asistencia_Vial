@@ -5,7 +5,52 @@
 <a href="{{ route('servicios.index') }}" class="btn btn-sm btn-ghost">Volver</a>
 </div>
 <div class="card-body">
-<form method="POST" action="{{ route('servicios.update', $servicio) }}" x-data="{ tipo: @json(old('tipo_servicio_id') ?? $servicio->tipo_servicio_id), mostrarDesc: @json((bool) (old('descripcion') ?? $servicio->descripcion)) }">                @csrf @method('PATCH')
+<form method="POST" action="{{ route('servicios.update', $servicio) }}" x-data="{
+    tipo: @json(old('tipo_servicio_id') ?? $servicio->tipo_servicio_id),
+    mostrarDesc: @json((bool) (old('descripcion') ?? $servicio->descripcion)),
+    kmIncluidos: {{ $servicio->cotizacion?->convenio?->km_incluidos ?? 0 }},
+    costoKm: {{ $servicio->cotizacion?->costo_km ?? 0 }},
+    convenioNombre: @js($servicio->cotizacion?->convenio?->nombre ?? ''),
+    kmsCobrados: {{ old('kms_cobrados_reales', $servicio->kms_cobrados_reales) ?? 0 }},
+    cargosExtras: {{ old('cargos_extras', $servicio->cargos_extras) ?? 0 }},
+    motivoCargos: @js(old('motivo_cargos_extras', $servicio->motivo_cargos_extras) ?? ''),
+    calcularCargoExtra() {
+        if (this.kmIncluidos <= 0 || this.kmsCobrados <= 0) {
+            Swal.fire({ title: 'Sin límite', text: 'Este servicio no tiene convenio con km incluidos.', icon: 'info', confirmButtonColor: '#6b7280' });
+            return;
+        }
+        const exceso = this.kmsCobrados - this.kmIncluidos;
+        if (exceso <= 0) {
+            this.cargosExtras = 0;
+            this.motivoCargos = '';
+            Swal.fire({ title: 'Dentro del límite', html: '<p class="text-sm text-gray-500">Km recorridos: <strong>' + this.kmsCobrados + '</strong><br>Km incluidos: <strong>' + this.kmIncluidos + '</strong><br><br>No excede el límite. No aplica cargo extra.</p>', icon: 'success', confirmButtonColor: '#16a34a' });
+            return;
+        }
+        const cargo = exceso * this.costoKm;
+        Swal.fire({
+            title: 'Cargo extra por KM',
+            html: '<div class="text-left text-sm space-y-2"><p>Km recorridos: <strong>' + this.kmsCobrados + '</strong></p><p>Km incluidos: <strong>' + this.kmIncluidos + '</strong></p><p>Km excedente: <strong>' + exceso + '</strong></p><p>Costo por km: <strong>$' + this.costoKm.toFixed(2) + '</strong></p><hr><p class="text-base font-bold">Cargo extra: <span style="color:#16a34a">$' + cargo.toFixed(2) + '</span></p></div>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Aplicar cargo',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#16a34a',
+            input: 'text',
+            inputLabel: 'Motivo del cargo extra',
+            inputPlaceholder: 'Ej: Exceso de 5 km por ruta alternativa',
+            inputValue: 'Exceso de ' + exceso + ' km sobre el límite de ' + this.kmIncluidos + ' km incluidos',
+            preConfirm: function(motivo) {
+                if (!motivo || !motivo.trim()) { Swal.showValidationMessage('Ingresa un motivo'); return false; }
+                return motivo;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.cargosExtras = cargo;
+                this.motivoCargos = result.value;
+            }
+        });
+    }
+}">                @csrf @method('PATCH')
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 <div class="space-y-5">
 <div class="card p-0 border-0 shadow-none">
@@ -41,7 +86,7 @@
 <div class="form-group full-width">
 <label>Tipo de Servicio</label>
 <input type="hidden" name="tipo_servicio_id" x-bind:value="tipo">
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-1">                        @foreach ($tiposServicio as $ts)                            <button type="button" @@click="tipo = {{ $ts->id }}; mostrarDesc = false"                                class="flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-sm font-medium transition-all duration-150"                                x-bind:class="tipo === {{ $ts->id }} ? 'border-[#FFD500] bg-[#FFF8DC] text-[#1a1a2e] shadow-sm' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'">
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-1">                        @foreach ($tiposServicio as $ts)                            <button type="button" @@click="tipo = {{ $ts->id }}; mostrarDesc = false"                                class="flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-sm font-medium transition-all duration-150"                                x-bind:class="tipo === {{ $ts->id }} ? 'border-[var(--geg-yellow)] bg-[color:var(--geg-yellow-light)] text-[#1a1a2e] shadow-sm' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'">
 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
 </svg>
@@ -106,12 +151,35 @@
 </div>
 <div class="form-group">
 <label>Kms cobrados reales</label>
-<input type="number" name="kms_cobrados_reales" value="{{ old('kms_cobrados_reales', $servicio->kms_cobrados_reales) }}" min="0">
+<input type="number" name="kms_cobrados_reales" value="{{ old('kms_cobrados_reales', $servicio->kms_cobrados_reales) }}" min="0" x-model.number="kmsCobrados">
 </div>
 <div class="form-group">
 <label>Costo final real ($)</label>
 <input type="number" step="0.01" name="costo_final_real" value="{{ old('costo_final_real', $servicio->costo_final_real) }}" min="0">
 </div>
+</div>
+@if ($servicio->cotizacion?->convenio && $servicio->cotizacion->convenio->km_incluidos > 0)
+<div class="mt-4 p-4 rounded-xl border border-dashed" :class="cargosExtras > 0 ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 bg-gray-50'">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-semibold" :class="cargosExtras > 0 ? 'text-emerald-700' : 'text-gray-700'">Cargo extra por KM excedente</p>
+<p class="text-xs text-gray-500 mt-0.5">Convenio: {{ $servicio->cotizacion->convenio->nombre }} — {{ $servicio->cotizacion->convenio->km_incluidos }} km incluidos</p>
+</div>
+<button type="button" @click="calcularCargoExtra()" class="btn btn-sm" :class="cargosExtras > 0 ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'btn-primary'">
+<svg class="w-4 h-4 inline-block -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+ Calcular
+</button>
+</div>
+<template x-if="cargosExtras > 0">
+<div class="mt-3 flex items-center gap-3 p-3 rounded-lg bg-white border border-emerald-200">
+<span class="text-lg font-bold text-emerald-700" x-text="'$' + Number(cargosExtras).toFixed(2)"></span>
+<span class="text-xs text-gray-500" x-text="motivoCargos"></span>
+</div>
+</template>
+</div>
+@endif
+<input type="hidden" name="cargos_extras" x-model.number="cargosExtras">
+<input type="hidden" name="motivo_cargos_extras" x-model="motivoCargos">
 </div>
 </div>
 </div>

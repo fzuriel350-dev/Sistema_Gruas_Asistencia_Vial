@@ -50,7 +50,7 @@ class TipoServicioController extends Controller
     public function show(TipoServicio $tiposServicio)
     {
         $this->authorize('empleado');
-        $tiposServicio->loadCount('cotizaciones', 'serviciosConfigurados');
+        $tiposServicio->loadCount('cotizaciones');
         return view('tipos_servicio.show', compact('tiposServicio'));
     }
 

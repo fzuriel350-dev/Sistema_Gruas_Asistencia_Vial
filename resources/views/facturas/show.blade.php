@@ -33,6 +33,10 @@
 <p class="font-semibold mt-0.5">#{{ $factura->servicio?->id }} — {{ $factura->servicio?->cotizacion?->folio ?? '—' }}</p>
 </div>
 <div>
+<span class="text-gray-500">Tipo de servicio</span>
+<p class="font-semibold mt-0.5">{{ $factura->servicio?->tipoServicio?->nombre ?? '—' }}</p>
+</div>
+<div>
 <span class="text-gray-500">Subtotal</span>
 <p class="font-semibold mt-0.5">${{ number_format($factura->subtotal, 2) }}</p>
 </div>
@@ -49,16 +53,12 @@
 <p class="font-semibold mt-0.5">{{ $factura->created_at->format('d/m/Y H:i') }}</p>
 </div>
 </div>
-@if ($factura->xml_url || $factura->pdf_url)
 <div class="mt-5 flex items-center gap-3 pt-4 border-t border-gray-100">
-@if ($factura->xml_url)<a href="{{ $factura->xml_url }}" target="_blank" class="btn btn-sm btn-ghost">Descargar XML</a>@endif
-@if ($factura->pdf_url)<a href="{{ $factura->pdf_url }}" target="_blank" class="btn btn-sm btn-ghost">Descargar PDF</a>@endif
+<a href="{{ route('facturas.descargar-pdf', $factura) }}" class="btn btn-primary" style="background:#2563eb;" target="_blank">Descargar PDF</a>
 </div>
-@endif
 </div>
 </div>
 @can('admin')<div class="flex items-center gap-3 mt-5">
-<a href="{{ route('facturas.edit', $factura) }}" class="btn btn-primary">Editar</a>
 <form method="POST" action="{{ route('facturas.destroy', $factura) }}" data-confirm="¿Eliminar esta factura?">@csrf @method('DELETE')<button type="submit" class="btn btn-secondary">Eliminar</button></form>
 </div>@endcan
 </div>@endsection

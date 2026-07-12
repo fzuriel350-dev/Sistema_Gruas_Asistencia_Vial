@@ -20,7 +20,7 @@
 <div class="stat-label">Cotizaciones</div>
 </div>
 </div>
-<a href="{{ route('convenios.create', ['aseguradora_id' => $aseguradora->id]) }}" class="stat-card hover:border-[#FFD500] transition-colors cursor-pointer">
+<a href="{{ route('convenios.create', ['aseguradora_id' => $aseguradora->id]) }}" class="stat-card hover:border-[var(--geg-yellow)] transition-colors cursor-pointer">
 <div class="stat-icon bg-emerald-50">＋</div>
 <div>
 <div class="stat-value text-sm">Nuevo convenio</div>
@@ -28,7 +28,7 @@
 </div>
 </a>
 </div>
-<div class="card">
+<div class="card mb-5">
 <div class="card-header"><h3>Datos de la aseguradora</h3></div>
 <div class="card-body">
 <div class="grid grid-cols-2 gap-4 text-sm">
@@ -59,6 +59,20 @@
 </div>
 @endif
 </div>
+</div>
+</div>
+<div class="card mb-5">
+<div class="card-header"><h3>Tipos de Servicio que Cubre</h3></div>
+<div class="card-body">
+@if ($aseguradora->tiposServicio->isEmpty())
+<p class="text-sm text-gray-400">No tiene tipos de servicio asignados.</p>
+@else
+<div class="flex flex-wrap gap-2">
+@foreach ($aseguradora->tiposServicio as $ts)
+<span class="px-3 py-1.5 rounded-full text-sm font-semibold bg-[color-mix(in_srgb,var(--geg-yellow)_15%,transparent)] text-gray-800">{{ $ts->nombre }}</span>
+@endforeach
+</div>
+@endif
 </div>
 </div>
 <div class="flex items-center gap-3">

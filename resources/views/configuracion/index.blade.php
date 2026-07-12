@@ -25,23 +25,19 @@
                         <input name="footer_texto" value="{{ old('footer_texto', $empresa->footer_texto) }}" placeholder="Texto opcional en el pie">
                         @error('footer_texto') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <div class="form-group">
-                        <label>Logo claro</label>
-                        <input type="file" name="logo" accept="image/*">
+                    <div class="form-group full-width">
+                        <label>Logo de la empresa</label>
+                        <input type="file" name="logo" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--geg-yellow)] file:text-black hover:file:bg-[var(--geg-yellow-dark)] file:cursor-pointer">
                         @if ($empresa->logo)
-                            <div class="mt-2"><img src="{{ Storage::url($empresa->logo) }}" class="h-10"></div>
-                        @endif
-                    </div>
-                    <div class="form-group">
-                        <label>Logo oscuro</label>
-                        <input type="file" name="logo_oscuro" accept="image/*">
-                        @if ($empresa->logo_oscuro)
-                            <div class="mt-2"><img src="{{ Storage::url($empresa->logo_oscuro) }}" class="h-10"></div>
+                            <div class="mt-3 flex items-center gap-4 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                <img src="{{ Storage::url($empresa->logo) }}" class="h-12 w-auto rounded-lg bg-white p-1 border border-gray-200">
+                                <div class="text-xs text-gray-500">Actual</div>
+                            </div>
                         @endif
                     </div>
                     <div class="form-group">
                         <label>Favicon</label>
-                        <input type="file" name="favicon" accept="image/*">
+                        <input type="file" name="favicon" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--geg-yellow)] file:text-black hover:file:bg-[var(--geg-yellow-dark)] file:cursor-pointer">
                         @if ($empresa->favicon)
                             <div class="mt-2"><img src="{{ Storage::url($empresa->favicon) }}" class="h-8"></div>
                         @endif

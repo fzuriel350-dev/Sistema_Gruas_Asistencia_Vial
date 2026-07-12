@@ -40,11 +40,13 @@
                     $icono = match (true) {
                         str_starts_with($n->tipo, 'servicio') => 'M13 10V3L4 14h7v7l9-11h-7z',
                         str_starts_with($n->tipo, 'cotizacion') => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+                        $n->tipo === 'factura' => 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z',
                         default => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
                     };
                     $color = match (true) {
                         str_starts_with($n->tipo, 'servicio') => 'bg-blue-100 text-blue-700',
                         str_starts_with($n->tipo, 'cotizacion') => 'bg-purple-100 text-purple-700',
+                        $n->tipo === 'factura' => 'bg-emerald-100 text-emerald-700',
                         default => 'bg-gray-100 text-gray-700',
                     };
                 @endphp
@@ -57,7 +59,7 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-0.5">
                             @if ($n->estado === 'no_leida')
-                                <span class="w-2 h-2 rounded-full bg-[#FFD500] shrink-0"></span>
+                                <span class="w-2 h-2 rounded-full bg-[var(--geg-yellow)] shrink-0"></span>
                             @endif
                             <span class="text-xs font-medium {{ $color }} px-1.5 py-0.5 rounded">{{ ucfirst(str_replace('_', ' ', $n->tipo)) }}</span>
                         </div>
@@ -67,7 +69,7 @@
                             @if ($n->estado === 'no_leida')
                                 <form method="POST" action="{{ route('notificaciones.leer', $n) }}">
                                     @csrf @method('PATCH')
-                                    <button type="submit" class="text-xs text-[#FFD500] hover:underline font-medium">Marcar leída</button>
+                                    <button type="submit" class="text-xs text-[var(--geg-yellow)] hover:underline font-medium">Marcar leída</button>
                                 </form>
                             @endif
                         </div>

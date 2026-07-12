@@ -1,7 +1,7 @@
 @extends('layouts.app')@section('title', $empleado->nombreCompleto())@section('content')<div class="max-w-3xl mx-auto">
 <div class="flex items-center justify-between mb-6">
 <div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-xl bg-[#FFD500]/20 flex items-center justify-center text-xl font-bold text-[#0F0F0F]">{{ substr($empleado->nombre, 0, 1) }}</div>
+<div class="w-12 h-12 rounded-xl bg-[color:var(--geg-yellow)]/20 flex items-center justify-center text-xl font-bold text-[#0F0F0F]">{{ substr($empleado->nombre, 0, 1) }}</div>
 <div>
 <h2 class="text-2xl font-extrabold tracking-tight">{{ $empleado->nombreCompleto() }}</h2>
 <p class="text-sm text-gray-500">{{ $empleado->usuario?->email ?: '' }}</p>
@@ -67,10 +67,6 @@
 <div>
 <span class="text-gray-500">Puesto</span>
 <p class="font-semibold mt-0.5">{{ $empleado->puesto ?: '—' }}</p>
-</div>
-<div>
-<span class="text-gray-500">Sueldo diario</span>
-<p class="font-semibold mt-0.5">${{ number_format($empleado->sueldo_diario, 2) }}</p>
 </div>
 <div>
 <span class="text-gray-500">Email</span>

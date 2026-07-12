@@ -51,11 +51,6 @@ class Unidad extends Model
         return $this->belongsTo(Operador::class);
     }
 
-    public function cargasDiesel()
-    {
-        return $this->hasMany(CargaDiesel::class);
-    }
-
     public function servicios()
     {
         return $this->hasMany(Servicio::class);

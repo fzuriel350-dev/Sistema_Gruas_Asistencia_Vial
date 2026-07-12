@@ -15,7 +15,6 @@
 <th>Puesto</th>
 <th>Dirección</th>
 <th>Rol</th>
-<th>Sueldo Diario</th>
 <th>Acciones</th>
 </tr>
 </thead>
@@ -34,7 +33,6 @@
 <span class="status-dot">
 </span> {{ $e->usuario?->role ?: '—' }}</span>
 </td>
-<td>${{ number_format($e->sueldo_diario, 2) }}</td>
 <td>
 <div class="flex items-center gap-2">
 <a href="{{ route('empleados.show', $e) }}" class="btn btn-sm btn-ghost">Ver</a>
@@ -44,7 +42,7 @@
 </div>
 </td>
 </tr>                    @empty                    <tr>
-<td colspan="10" class="text-center text-gray-500 py-8">No hay empleados registrados.</td>
+<td colspan="9" class="text-center text-gray-500 py-8">No hay empleados registrados.</td>
 </tr>                    @endforelse                </tbody>
 </table>
 </div>

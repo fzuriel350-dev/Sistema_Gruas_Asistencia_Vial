@@ -6,8 +6,11 @@ use App\Models\Cotizacion;
 use App\Models\Convenio;
 use App\Models\Cliente;
 use App\Models\Aseguradora;
+use App\Models\Notificacion;
 use App\Models\TipoServicio;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class CotizacionController extends Controller
@@ -154,6 +157,21 @@ class CotizacionController extends Controller
         $cotizacion->estatus = 'pendiente';
 
         $cotizacion->save();
+
+        $usuarios = User::where('empresa_id', session('empresa_id'))
+            ->whereIn('role', [User::ROLE_ADMIN, User::ROLE_COTIZADOR])
+            ->get();
+
+        foreach ($usuarios as $u) {
+            Notificacion::create([
+                'empresa_id' => session('empresa_id'),
+                'usuario_id' => $u->id,
+                'mensaje' => "Nueva cotización {$cotizacion->folio} creada. Revisión pendiente.",
+                'tipo' => 'cotizacion_creada',
+                'estado' => 'no_leida',
+            ]);
+            Cache::forget("notificaciones_no_leidas_{$u->id}");
+        }
 
         return redirect()->route('cotizaciones.index')
             ->with('success', 'Cotización generada correctamente.');

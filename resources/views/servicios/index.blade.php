@@ -3,8 +3,8 @@
 <h3>Servicios</h3>
 <div class="flex items-center gap-3">
 <form method="GET" class="flex items-center gap-3">
-<input type="text" name="q" value="{{ request('q') }}" placeholder="Buscar por folio, cliente, operador..." class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all w-56">
-                    <select name="estado" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all">
+<input type="text" name="q" value="{{ request('q') }}" placeholder="Buscar por folio, cliente, operador..." class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all w-56">
+                    <select name="estado" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all">
 <option value="">Todos los estados</option>
 <option value="asignado" @selected(request('estado') === 'asignado')>Asignado</option>
 <option value="inicio_servicio" @selected(request('estado') === 'inicio_servicio')>Inicio Servicio</option>

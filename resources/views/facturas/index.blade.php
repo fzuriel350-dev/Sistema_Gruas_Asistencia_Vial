@@ -1,7 +1,6 @@
 @extends('layouts.app')@section('title', 'Facturas')@section('content')<div class="max-w-7xl mx-auto">    @if (session('success'))        <div class="mb-5 px-5 py-3.5 rounded-xl text-sm font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">{{ session('success') }}</div>    @endif    <div class="card">
 <div class="card-header">
 <h3>Facturas</h3>
-@can('admin')<a href="{{ route('facturas.create') }}" class="btn btn-primary">+ Nueva Factura</a>@endcan
 </div>
 <div class="table-container">
 <table>
@@ -34,9 +33,7 @@
 <td>
 <div class="flex items-center gap-2">
 <a href="{{ route('facturas.show', $f) }}" class="btn btn-sm btn-ghost">Ver</a>
-@can('admin')<a href="{{ route('facturas.edit', $f) }}" class="btn btn-sm btn-primary">Editar</a>@endcan
-@can('admin')<form method="POST" action="{{ route('facturas.destroy', $f) }}" data-confirm="¿Eliminar esta factura?">                                    @csrf @method('DELETE')                                    <button type="submit" class="btn btn-sm btn-secondary">Eliminar</button>
-</form>@endcan
+@can('admin')<form method="POST" action="{{ route('facturas.destroy', $f) }}" data-confirm="¿Eliminar esta factura?">                                    @csrf @method('DELETE')                                    <button type="submit" class="btn btn-sm btn-secondary">Eliminar</button></form>@endcan
 </div>
 </td>
 </tr>                    @empty                    <tr>

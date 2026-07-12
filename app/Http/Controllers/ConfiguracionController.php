@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Empresa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class ConfiguracionController extends Controller
@@ -47,14 +48,14 @@ class ConfiguracionController extends Controller
         if ($request->hasFile('logo')) {
             $data['logo'] = $request->file('logo')->store('empresas', 'public');
         }
-        if ($request->hasFile('logo_oscuro')) {
-            $data['logo_oscuro'] = $request->file('logo_oscuro')->store('empresas', 'public');
-        }
         if ($request->hasFile('favicon')) {
             $data['favicon'] = $request->file('favicon')->store('empresas', 'public');
         }
 
         $empresa->update($data);
+
+        Cache::forget("empresa_{$empresa->id}");
+        Cache::forget("servicios_activos_{$empresa->id}");
 
         return redirect()->route('configuracion.index')
             ->with('success', 'Configuración actualizada correctamente.');

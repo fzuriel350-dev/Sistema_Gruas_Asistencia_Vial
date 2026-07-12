@@ -3,18 +3,18 @@
 <h3>Todas las cotizaciones</h3>
 <div class="flex items-center gap-3">
 <form method="GET" class="flex items-center gap-3">
-<input type="text" name="q" value="{{ request('q') }}" placeholder="Buscar folio, cliente..." class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all w-44">
-<select name="aseguradora_id" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all">
+<input type="text" name="q" value="{{ request('q') }}" placeholder="Buscar folio, cliente..." class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all w-44">
+<select name="aseguradora_id" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all">
 <option value="">Todas las aseguradoras</option>                        @foreach ($aseguradoras as $a)                        <option value="{{ $a->id }}" @selected(request('aseguradora_id') == $a->id)>{{ $a->nombre }}</option>                        @endforeach                    </select>
-<select name="tipo_servicio_id" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all">
+<select name="tipo_servicio_id" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all">
 <option value="">Todos los servicios</option>                        @foreach ($tiposServicio as $ts)                        <option value="{{ $ts->id }}" @selected(request('tipo_servicio_id') == $ts->id)>{{ $ts->nombre }}</option>                        @endforeach                    </select>
-<select name="estatus" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all">
+<select name="estatus" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all">
 <option value="">Todos los estados</option>
 <option value="pendiente" @selected(request('estatus') === 'pendiente')>Pendiente</option>
 <option value="aprobado" @selected(request('estatus') === 'aprobado')>Aprobado</option>
 <option value="rechazado" @selected(request('estatus') === 'rechazado')>Rechazado</option>
 </select>
-<select name="orden" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all">
+<select name="orden" class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all">
 <option value="creacion_desc" @selected(request('orden', 'creacion_desc') === 'creacion_desc')>Más recientes</option>
 <option value="creacion_asc" @selected(request('orden') === 'creacion_asc')>Más antiguos</option>
 <option value="cliente_asc" @selected(request('orden') === 'cliente_asc')>Cliente A-Z</option>

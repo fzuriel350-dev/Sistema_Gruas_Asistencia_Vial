@@ -8,7 +8,8 @@
 <th>ID</th>
 <th>Nombre</th>
 <th>Aseguradora</th>
-<th>Tipo</th>
+<th>Tipo Servicio</th>
+<th>Alcance</th>
 <th>Banderazo</th>
 <th>Costo/km</th>
 <th>Km incl.</th>
@@ -23,6 +24,7 @@
 <td><strong>#{{ $c->id }}</strong></td>
 <td>{{ $c->nombre }}</td>
 <td>{{ $c->aseguradora?->nombre ?: '—' }}</td>
+<td>{{ $c->tipoServicio?->nombre ?: '—' }}</td>
 <td>{{ ucfirst($c->tipo) }}</td>
 <td>${{ number_format($c->costo_banderazo, 2) }}</td>
 <td>${{ number_format($c->costo_km, 2) }}</td>
@@ -36,7 +38,7 @@
 <a href="{{ route('convenios.show', $c) }}" class="btn btn-sm btn-secondary">Ver</a>                                @if (auth()->user()->isAdmin())                                <a href="{{ route('convenios.edit', $c) }}" class="btn btn-sm btn-primary">Editar</a>                                <form method="POST" action="{{ route('convenios.destroy', $c) }}" class="inline" data-confirm="¿Eliminar este convenio?">                                    @csrf @method('DELETE')                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>                                </form>                                @endif                            </div>
 </td>
 </tr>                    @empty                    <tr>
-<td colspan="12" class="text-center text-gray-500 py-8">No hay convenios registrados.</td>
+<td colspan="13" class="text-center text-gray-500 py-8">No hay convenios registrados.</td>
 </tr>                    @endforelse                </tbody>
 </table>
 </div>

@@ -35,7 +35,8 @@
                 <div class="grid grid-cols-1 gap-4 mb-5">
                     <div>
                         <label class="label">Nombre completo</label>
-                        <input type="text" name="name" value="{{ old('name', Auth::user()->name) }}" class="input" required>
+                        <input type="text" value="{{ Auth::user()->name }}" class="input bg-gray-50 text-gray-500" disabled readonly>
+                        <p class="mt-1 text-xs text-gray-400">El nombre solo puede ser modificado por un administrador.</p>
                     </div>
                     <div>
                         <label class="label">Correo electrónico</label>

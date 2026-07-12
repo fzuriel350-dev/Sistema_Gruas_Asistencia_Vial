@@ -5,29 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Operador extends Model
+class Cotizador extends Model
 {
     use SoftDeletes, Traits\BelongsToEmpresa;
 
-    protected $table = 'operadores';
+    protected $table = 'cotizadores';
 
     protected $fillable = [
         'empresa_id',
         'empleado_id',
-        'licencia_tipo',
-        'licencia_año_vencimiento',
-        'licencia_vencimiento_federal',
-        'disponible',
-        'puntos_acumulados',
+        'especialidades',
+        'zona_cobertura',
+        'activo',
     ];
 
     protected function casts(): array
     {
         return [
-            'licencia_año_vencimiento' => 'date',
-            'licencia_vencimiento_federal' => 'date',
-            'disponible' => 'boolean',
-            'puntos_acumulados' => 'integer',
+            'activo' => 'boolean',
         ];
     }
 
@@ -41,14 +36,8 @@ class Operador extends Model
         return $this->belongsTo(Empleado::class);
     }
 
-    public function unidades()
-    {
-        return $this->hasMany(Unidad::class);
-    }
-
-    public function servicios()
+    public function servicios(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Servicio::class);
     }
-
 }

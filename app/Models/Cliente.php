@@ -43,11 +43,6 @@ class Cliente extends Model
         return $this->hasMany(Cotizacion::class);
     }
 
-    public function serviciosConfigurados()
-    {
-        return $this->hasMany(ServicioConfigurado::class);
-    }
-
     public function servicios()
     {
         return $this->hasManyThrough(Servicio::class, Cotizacion::class, 'cliente_id', 'cotizacion_id');

@@ -45,7 +45,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $paso['icon'] }}" />
                             </svg>
                         </div>
-                        <span class="text-[11px] mt-1.5 font-medium {{ $completado ? 'text-gray-800' : ($actual ? 'text-[#FFD500]' : 'text-gray-400') }}">
+                        <span class="text-[11px] mt-1.5 font-medium {{ $completado ? 'text-gray-800' : ($actual ? 'text-[var(--geg-yellow)]' : 'text-gray-400') }}">
                             {{ $paso['label'] }}
                         </span>
                         @if (!$loop->last)

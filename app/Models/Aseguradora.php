@@ -29,4 +29,9 @@ class Aseguradora extends Model
     {
         return $this->hasMany(Cotizacion::class);
     }
+
+    public function tiposServicio()
+    {
+        return $this->belongsToMany(TipoServicio::class, 'aseguradora_tipo_servicio', 'aseguradora_id', 'tipo_servicio_id');
+    }
 }

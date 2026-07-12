@@ -25,6 +25,8 @@ class Servicio extends Model
         'kms_regreso_base',
         'kms_cobrados_reales',
         'costo_final_real',
+        'cargos_extras',
+        'motivo_cargos_extras',
         'observaciones',
         'motivo_liberacion',
     ];
@@ -68,11 +70,6 @@ class Servicio extends Model
     public function oficina()
     {
         return $this->belongsTo(Oficina::class);
-    }
-
-    public function bitacoraTiempos()
-    {
-        return $this->hasOne(BitacoraTiempoServicio::class, 'servicio_id');
     }
 
     public function autorizacionesCancelacion()

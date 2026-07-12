@@ -4,7 +4,7 @@
 <div class="flex items-center gap-3">
 <a href="{{ route('clientes.create') }}" class="btn btn-primary">+ Nuevo Cliente</a>
 <form method="GET" class="flex items-center gap-3">
-<input type="text" name="q" value="{{ request('q') }}" placeholder="Buscar cliente..."                        class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all w-48">
+<input type="text" name="q" value="{{ request('q') }}" placeholder="Buscar cliente..."                        class="px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all w-48">
 <button type="submit" class="btn btn-sm btn-secondary">Buscar</button>
 </form>
 </div>

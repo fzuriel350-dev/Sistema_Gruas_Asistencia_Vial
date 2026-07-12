@@ -16,7 +16,11 @@
 <p class="font-medium">{{ $convenio->aseguradora?->nombre ?: '—' }}</p>
 </div>
 <div>
-<p class="text-xs text-gray-500 uppercase font-semibold">Tipo</p>
+<p class="text-xs text-gray-500 uppercase font-semibold">Tipo de Servicio</p>
+<p class="font-medium">{{ $convenio->tipoServicio?->nombre ?: '—' }}</p>
+</div>
+<div>
+<p class="text-xs text-gray-500 uppercase font-semibold">Alcance Geográfico</p>
 <p class="font-medium">{{ ucfirst($convenio->tipo) }}</p>
 </div>
 <div>

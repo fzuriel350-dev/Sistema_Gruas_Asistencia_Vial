@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Factura;
-use App\Models\Cliente;
-use App\Models\Servicio;
+use App\Models\Empresa;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class FacturaController extends Controller
 {
@@ -19,79 +19,25 @@ class FacturaController extends Controller
         return view('facturas.index', compact('facturas'));
     }
 
-    public function create()
-    {
-        $this->authorize('admin');
-        $clientes = Cliente::where('empresa_id', session('empresa_id'))->orderBy('nombre')->get();
-        $servicios = Servicio::where('empresa_id', session('empresa_id'))
-            ->with('cotizacion')
-            ->orderByDesc('id')
-            ->get();
-        return view('facturas.create', compact('clientes', 'servicios'));
-    }
-
-    protected function reglasValidacion(): array
-    {
-        return [
-            'cliente_id' => ['required', 'exists:clientes,id'],
-            'servicio_id' => ['required', 'exists:servicios,id'],
-            'folio_factura' => ['required', 'string', 'max:50', 'regex:/^[\p{L}\p{N}\-\/]+$/u'],
-            'subtotal' => ['required', 'numeric', 'min:0'],
-            'iva' => ['required', 'numeric', 'min:0'],
-            'total' => ['required', 'numeric', 'min:0'],
-            'uuid_fiscal' => ['nullable', 'string', 'max:100', 'regex:/^[A-Fa-f0-9\-]+$/'],
-            'xml_url' => ['nullable', 'string', 'max:255'],
-            'pdf_url' => ['nullable', 'string', 'max:255'],
-            'estatus' => ['required', 'in:vigente,cancelada'],
-        ];
-    }
-
-    protected function mensajesValidacion(): array
-    {
-        return [
-            'cliente_id.required' => 'Selecciona un cliente.',
-            'servicio_id.required' => 'Selecciona un servicio.',
-            'folio_factura.required' => 'El folio de la factura es obligatorio.',
-            'subtotal.required' => 'El subtotal es obligatorio.',
-            'iva.required' => 'El IVA es obligatorio.',
-            'total.required' => 'El total es obligatorio.',
-            'estatus.required' => 'Selecciona el estatus de la factura.',
-        ];
-    }
-
-    public function store(Request $request)
-    {
-        $this->authorize('admin');
-        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
-        $data['empresa_id'] = session('empresa_id');
-        Factura::create($data);
-        return redirect()->route('facturas.index')->with('success', 'Factura registrada correctamente.');
-    }
-
     public function show(Factura $factura)
     {
         $this->authorize('empleado');
-        $factura->load('cliente', 'servicio.cotizacion.cliente', 'servicio.operador.empleado');
+        $factura->load('cliente', 'servicio.tipoServicio', 'servicio.cotizacion.cliente', 'servicio.cotizacion.aseguradora', 'servicio.operador.empleado');
         return view('facturas.show', compact('factura'));
     }
 
-    public function edit(Factura $factura)
+    public function descargarPdf(Factura $factura)
     {
-        $this->authorize('admin');
-        $clientes = Cliente::where('empresa_id', session('empresa_id'))->orderBy('nombre')->get();
-        $servicios = Servicio::where('empresa_id', session('empresa_id'))
-            ->with('cotizacion')
-            ->orderByDesc('id')
-            ->get();
-        return view('facturas.edit', compact('factura', 'clientes', 'servicios'));
-    }
+        $this->authorize('empleado');
 
-    public function update(Request $request, Factura $factura)
-    {
-        $this->authorize('admin');
-        $data = $request->validate($this->reglasValidacion(), $this->mensajesValidacion());
-        $factura->update($data);
-        return redirect()->route('facturas.index')->with('success', 'Factura actualizada correctamente.');
+        $factura->load('cliente', 'servicio.tipoServicio', 'servicio.cotizacion.aseguradora', 'empresa');
+        $empresa = $factura->empresa;
+
+        $pdf = Pdf::loadView('facturas.pdf', compact('factura', 'empresa'))
+            ->setPaper('letter')
+            ->setOptions(['isRemoteEnabled' => true]);
+
+        return $pdf->download('factura_' . $factura->folio_factura . '.pdf');
     }
 
     public function destroy(Factura $factura)

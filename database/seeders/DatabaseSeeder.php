@@ -15,11 +15,8 @@ use App\Models\Unidad;
 use App\Models\Servicio;
 use App\Models\Notificacion;
 use App\Models\Oficina;
-use App\Models\CargaDiesel;
-use App\Models\BitacoraTiempoServicio;
 use App\Models\AutorizacionCancelacion;
 use App\Models\Factura;
-use App\Models\ServicioConfigurado;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -226,17 +223,30 @@ class DatabaseSeeder extends Seeder
             'descripcion' => 'Servicio de arrastre de vehículos ligeros y pesados',
         ]);
 
+        $asistencia = TipoServicio::create([
+            'empresa_id' => $empresa->id,
+            'nombre' => 'Asistencia',
+            'descripcion' => 'Asistencia vial básica: paso de corriente, cambio de llanta, etc.',
+        ]);
+
+        $plataforma = TipoServicio::create([
+            'empresa_id' => $empresa->id,
+            'nombre' => 'Plataforma',
+            'descripcion' => 'Servicio de plataforma hidráulica para carga y descarga de vehículos',
+        ]);
+
         $rescate = TipoServicio::create([
             'empresa_id' => $empresa->id,
             'nombre' => 'Rescate',
             'descripcion' => 'Servicio de rescate vial para vehículos varados',
         ]);
 
-        $auxilio = TipoServicio::create([
-            'empresa_id' => $empresa->id,
-            'nombre' => 'Auxilio Vial',
-            'descripcion' => 'Asistencia vial básica: paso de corriente, cambio de llanta, etc.',
-        ]);
+        // Asignar tipos de servicio a aseguradoras
+        $qualitas->tiposServicio()->sync([$arrastre->id, $asistencia->id, $plataforma->id, $rescate->id]);
+        $gnp->tiposServicio()->sync([$arrastre->id, $rescate->id]);
+        $axa->tiposServicio()->sync([$asistencia->id, $plataforma->id]);
+        $bbva->tiposServicio()->sync([$arrastre->id, $asistencia->id]);
+        $mapfre->tiposServicio()->sync([$rescate->id, $plataforma->id]);
 
         // 7. Clientes
         $cliente1 = Cliente::create([
@@ -385,7 +395,7 @@ class DatabaseSeeder extends Seeder
             'empresa_id' => $empresa->id,
             'cliente_id' => $cliente3->id,
             'aseguradora_id' => $gnp->id,
-            'tipo_servicio_id' => $auxilio->id,
+            'tipo_servicio_id' => $asistencia->id,
             'folio' => 'COT-0008',
             'origen_direccion' => 'Av. Revolución 800, CDMX',
             'destino_direccion' => 'Mismo lugar (auxilio vial)',
@@ -454,6 +464,7 @@ class DatabaseSeeder extends Seeder
         Convenio::create([
             'empresa_id' => $empresa->id,
             'aseguradora_id' => $qualitas->id,
+            'tipo_servicio_id' => $arrastre->id,
             'nombre' => 'Convenio Quálitas Básico',
             'tipo' => 'local',
             'costo_banderazo' => 450.00,
@@ -467,6 +478,7 @@ class DatabaseSeeder extends Seeder
         $convenioGnp = Convenio::create([
             'empresa_id' => $empresa->id,
             'aseguradora_id' => $gnp->id,
+            'tipo_servicio_id' => $rescate->id,
             'nombre' => 'Convenio GNP Corporativo',
             'tipo' => 'foraneo',
             'costo_banderazo' => 650.00,
@@ -550,7 +562,7 @@ class DatabaseSeeder extends Seeder
             'empresa_id' => $empresa->id,
             'cliente_id' => $cliente4->id,
             'aseguradora_id' => $bbva->id,
-            'tipo_servicio_id' => $auxilio->id,
+            'tipo_servicio_id' => $asistencia->id,
             'folio' => 'COT-0004',
             'origen_direccion' => 'Periférico Sur 1000, CDMX',
             'destino_direccion' => 'Periférico Sur 1000, CDMX (mismo lugar)',
@@ -669,21 +681,8 @@ class DatabaseSeeder extends Seeder
 
         // 11. Oficina — creada en sección 2
 
-        // 12. Bitácora de Tiempos (para servicio finalizado)
+        // 12. Factura (para servicio finalizado)
         $servicioFinalizado = Servicio::where('estado', 'finalizado')->first();
-        if ($servicioFinalizado) {
-            BitacoraTiempoServicio::create([
-                'servicio_id' => $servicioFinalizado->id,
-                'hora_asignado' => now()->subDays(4)->setHour(9)->setMinute(0),
-                'hora_inicio_servicio' => now()->subDays(4)->setHour(9)->setMinute(30),
-                'hora_en_sitio_origen' => now()->subDays(4)->setHour(10)->setMinute(0),
-                'hora_salida_destino' => now()->subDays(4)->setHour(10)->setMinute(10),
-                'hora_en_destino' => now()->subDays(4)->setHour(10)->setMinute(35),
-                'hora_finalizado' => now()->subDays(4)->setHour(10)->setMinute(45),
-            ]);
-        }
-
-        // 13. Factura (para servicio finalizado)
         if ($servicioFinalizado) {
             Factura::create([
                 'empresa_id' => $empresa->id,
@@ -696,31 +695,6 @@ class DatabaseSeeder extends Seeder
                 'estatus' => 'vigente',
             ]);
         }
-
-        // 14. Cargas Diesel
-        CargaDiesel::create([
-            'empresa_id' => $empresa->id,
-            'unidad_id' => $unidad1->id,
-            'operador_id' => $operador1->id,
-            'litros' => 150.00,
-            'costo_litro' => 24.50,
-            'importe_total' => 3675.00,
-            'km_actual' => 15270,
-            'fecha_carga' => now()->subDays(3)->setHour(7)->setMinute(30),
-            'observaciones' => 'Carga completa en estación Base Central',
-        ]);
-
-        CargaDiesel::create([
-            'empresa_id' => $empresa->id,
-            'unidad_id' => $unidad2->id,
-            'operador_id' => $operador2->id,
-            'litros' => 80.00,
-            'costo_litro' => 24.80,
-            'importe_total' => 1984.00,
-            'km_actual' => 32150,
-            'fecha_carga' => now()->subDay()->setHour(6)->setMinute(45),
-            'observaciones' => 'Recarga para servicio del día',
-        ]);
 
         // 16. Autorizaciones Cancelación
         AutorizacionCancelacion::create([
@@ -743,40 +717,5 @@ class DatabaseSeeder extends Seeder
             'fecha_solicitud' => now()->subHours(2),
         ]);
 
-        // 17. Servicios Configurados
-        ServicioConfigurado::create([
-            'empresa_id' => $empresa->id,
-            'cliente_id' => $cliente3->id,
-            'tipo_servicio_id' => $arrastre->id,
-            'nombre' => 'Arrastre GNP - Plataforma Pesada',
-            'tipo' => 'aseguradora',
-            'costo_banderazo' => 650.00,
-            'costo_km' => 85.00,
-            'activo' => true,
-            'observaciones' => 'Servicio contratado por GNP para arrastre de unidades pesadas',
-        ]);
-
-        ServicioConfigurado::create([
-            'empresa_id' => $empresa->id,
-            'cliente_id' => $cliente1->id,
-            'tipo_servicio_id' => $arrastre->id,
-            'nombre' => 'Arrastre Local - Cliente Particular',
-            'tipo' => 'particular',
-            'costo_banderazo' => 450.00,
-            'costo_km' => 100.00,
-            'activo' => true,
-        ]);
-
-        ServicioConfigurado::create([
-            'empresa_id' => $empresa->id,
-            'cliente_id' => $cliente4->id,
-            'tipo_servicio_id' => $auxilio->id,
-            'nombre' => 'Auxilio Vial - Autopistas del Valle',
-            'tipo' => 'publico',
-            'costo_banderazo' => 350.00,
-            'costo_km' => 50.00,
-            'activo' => false,
-            'observaciones' => 'Servicio descontinuado desde enero 2026',
-        ]);
     }
 }

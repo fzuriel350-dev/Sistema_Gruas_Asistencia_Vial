@@ -77,9 +77,9 @@
 </div>
 </div>
 <div class="mt-3 flex flex-col gap-3">
-<label class="route-card cursor-pointer" :style="incluye_peajes == '0' ? 'border-color: #FFD500; background: linear-gradient(135deg, #FFFEF0, #FFF9C4); box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.2);' : ''" x-on:click="incluye_peajes = '0'; costo_aprox_casetas = 0">
+<label class="route-card cursor-pointer" :style="incluye_peajes == '0' ? 'border-color: var(--geg-yellow); background: linear-gradient(135deg, #FFFEF0, #FFF9C4); box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.2);' : ''" x-on:click="incluye_peajes = '0'; costo_aprox_casetas = 0">
 <div class="flex items-center gap-3">
-<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" :style="incluye_peajes == '0' ? 'border-color: #FFD500; background: #FFD500;' : ''">
+<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" :style="incluye_peajes == '0' ? 'border-color: var(--geg-yellow); background: var(--geg-yellow);' : ''">
 <div x-show="incluye_peajes == '0'" class="w-2 h-2 rounded-full bg-white"></div>
 </div>
 <div>
@@ -92,9 +92,9 @@
 <div class="route-price ml-auto" x-show="sinPeajeTotal() > 0" x-text="'$' + formatPrice(sinPeajeTotal())"></div>
 </div>
 </label>
-<label class="route-card cursor-pointer" :style="incluye_peajes == '1' ? 'border-color: #FFD500; background: linear-gradient(135deg, #FFFEF0, #FFF9C4); box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.2);' : ''" x-on:click="incluye_peajes = '1'">
+<label class="route-card cursor-pointer" :style="incluye_peajes == '1' ? 'border-color: var(--geg-yellow); background: linear-gradient(135deg, #FFFEF0, #FFF9C4); box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.2);' : ''" x-on:click="incluye_peajes = '1'">
 <div class="flex items-center gap-3">
-<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" :style="incluye_peajes == '1' ? 'border-color: #FFD500; background: #FFD500;' : ''">
+<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" :style="incluye_peajes == '1' ? 'border-color: var(--geg-yellow); background: var(--geg-yellow);' : ''">
 <div x-show="incluye_peajes == '1'" class="w-2 h-2 rounded-full bg-white"></div>
 </div>
 <div class="flex-1">
@@ -121,7 +121,7 @@
             <div class="card">
                 <div class="card-header"><h3>Detalles y observaciones</h3></div>
                 <div class="card-body">
-                    <textarea name="notas" rows="3" class="w-full px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[#FFD500] focus:bg-white transition-all" placeholder="Notas internas, instrucciones especiales...">{{ old('notas', $cotizacione->notas) }}</textarea>
+                    <textarea name="notas" rows="3" class="w-full px-3 py-2 rounded-lg text-sm border border-gray-200 bg-gray-50 focus:outline-none focus:border-[var(--geg-yellow)] focus:bg-white transition-all" placeholder="Notas internas, instrucciones especiales...">{{ old('notas', $cotizacione->notas) }}</textarea>
                 </div>
             </div>
             <div class="form-actions">

@@ -13,12 +13,22 @@
 </div>
 <div class="form-group">
 <label for="aseguradora_id">Aseguradora</label>
-<select id="aseguradora_id" name="aseguradora_id" required>
+<select id="aseguradora_id" name="aseguradora_id" required x-data x-on:change="await $dispatch('cargar-tipos', {aseguradoraId: $event.target.value})">
 <option value="">Seleccionar aseguradora...</option>                    @foreach ($aseguradoras as $a)                        <option value="{{ $a->id }}" @selected(old('aseguradora_id', $convenio->aseguradora_id) == $a->id)>{{ $a->nombre }}</option>                    @endforeach                </select>
 <x-input-error :messages="$errors->get('aseguradora_id')" />
 </div>
+<div class="form-group" x-data="{tipos: @js($tiposServicio), cargando: false}" @cargar-tipos.window="cargando = true; fetch('/convenios/aseguradora/' + $event.detail.aseguradoraId + '/tipos').then(r => r.json()).then(data => { tipos = data; cargando = false; })">
+<label for="tipo_servicio_id">Tipo de Servicio</label>
+<select id="tipo_servicio_id" name="tipo_servicio_id" required :disabled="cargando">
+<option value="">Seleccionar tipo...</option>
+<template x-for="t in tipos" :key="t.id">
+<option :value="t.id" x-text="t.nombre" :selected="t.id == '{{ old('tipo_servicio_id', $convenio->tipo_servicio_id) }}'"></option>
+</template>
+</select>
+<x-input-error :messages="$errors->get('tipo_servicio_id')" />
+</div>
 <div class="form-group">
-<label for="tipo">Tipo</label>
+<label for="tipo">Alcance Geográfico</label>
 <select id="tipo" name="tipo" required>
 <option value="local" @selected(old('tipo', $convenio->tipo) === 'local')>Local</option>
 <option value="foraneo" @selected(old('tipo', $convenio->tipo) === 'foraneo')>Foráneo</option>

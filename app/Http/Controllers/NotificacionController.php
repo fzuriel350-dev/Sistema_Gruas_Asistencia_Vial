@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Notificacion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class NotificacionController extends Controller
 {
@@ -38,6 +39,7 @@ class NotificacionController extends Controller
     public function marcarLeida(Notificacion $notificacione)
     {
         $notificacione->update(['estado' => 'leida']);
+        Cache::forget("notificaciones_no_leidas_" . auth()->id());
         return back()->with('success', 'Notificación marcada como leída.');
     }
 
@@ -47,6 +49,7 @@ class NotificacionController extends Controller
             ->where('usuario_id', auth()->id())
             ->where('estado', 'no_leida')
             ->update(['estado' => 'leida']);
+        Cache::forget("notificaciones_no_leidas_" . auth()->id());
         return back()->with('success', 'Todas las notificaciones marcadas como leídas.');
     }
 }

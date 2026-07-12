@@ -18,15 +18,7 @@ class Empleado extends Model
         'telefono',
         'direccion',
         'puesto',
-        'sueldo_diario',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'sueldo_diario' => 'decimal:2',
-        ];
-    }
 
     public function empresa()
     {
@@ -46,6 +38,11 @@ class Empleado extends Model
     public function operador()
     {
         return $this->hasOne(Operador::class);
+    }
+
+    public function cotizador()
+    {
+        return $this->hasOne(Cotizador::class);
     }
 
     public function nombreCompleto(): string

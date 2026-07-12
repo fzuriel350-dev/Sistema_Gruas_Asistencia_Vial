@@ -64,7 +64,7 @@
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
 <div class="stat-card">
-<div class="stat-icon" style="background: linear-gradient(135deg, #FFF3B0, #FFE066); color: #B39500;">
+<div class="stat-icon" style="background: linear-gradient(135deg, var(--geg-yellow-light), color-mix(in srgb, var(--geg-yellow) 30%, white)); color: var(--geg-yellow-dark);">
 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 </svg>
@@ -129,36 +129,36 @@ Activo
 <div class="card-header"><h3>Accesos rápidos</h3></div>
 <div class="card-body">
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-<a href="{{ route('clientes.cotizaciones') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[#FFD500] hover:bg-[#FFFDF0] transition-all duration-200">
-<div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background: linear-gradient(135deg, #FFF3B0, #FFE066);">
-<svg class="w-6 h-6" style="color: #B39500;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<a href="{{ route('clientes.cotizaciones') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[var(--geg-yellow)] hover:bg-[var(--geg-yellow-light)] transition-all duration-200">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background: linear-gradient(135deg, var(--geg-yellow-light), color-mix(in srgb, var(--geg-yellow) 30%, white));">
+<svg class="w-6 h-6" style="color: var(--geg-yellow-dark);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 </svg>
 </div>
 <div>
-<div class="font-bold text-sm text-gray-800 group-hover:text-[#B39500] transition-colors">Mis cotizaciones</div>
+<div class="font-bold text-sm text-gray-800 group-hover:text-[var(--geg-yellow-dark)] transition-colors">Mis cotizaciones</div>
 <div class="text-xs text-gray-500 mt-0.5">Ver y gestionar cotizaciones</div>
 </div>
 </a>
-<a href="{{ route('clientes.servicios') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[#FFD500] hover:bg-[#FFFDF0] transition-all duration-200">
+<a href="{{ route('clientes.servicios') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[var(--geg-yellow)] hover:bg-[var(--geg-yellow-light)] transition-all duration-200">
 <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0);">
 <svg class="w-6 h-6" style="color: #059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
 </svg>
 </div>
 <div>
-<div class="font-bold text-sm text-gray-800 group-hover:text-[#B39500] transition-colors">Mis servicios</div>
+<div class="font-bold text-sm text-gray-800 group-hover:text-[var(--geg-yellow-dark)] transition-colors">Mis servicios</div>
 <div class="text-xs text-gray-500 mt-0.5">Dar seguimiento a tus servicios</div>
 </div>
 </a>
-<a href="{{ route('clientes.notificaciones') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[#FFD500] hover:bg-[#FFFDF0] transition-all duration-200">
+<a href="{{ route('clientes.notificaciones') }}" class="group flex items-center gap-4 p-5 rounded-xl border-2 border-gray-100 hover:border-[var(--geg-yellow)] hover:bg-[var(--geg-yellow-light)] transition-all duration-200">
 <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
 <svg class="w-6 h-6" style="color: #D97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
 </svg>
 </div>
 <div>
-<div class="font-bold text-sm text-gray-800 group-hover:text-[#B39500] transition-colors">Notificaciones</div>
+<div class="font-bold text-sm text-gray-800 group-hover:text-[var(--geg-yellow-dark)] transition-colors">Notificaciones</div>
 <div class="text-xs text-gray-500 mt-0.5">Ver tus notificaciones</div>
 </div>
 </a>

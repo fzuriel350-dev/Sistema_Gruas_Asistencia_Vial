@@ -51,7 +51,25 @@
                         <td>{{ $u->empleado?->nombreCompleto() ?: '—' }}</td>
                         <td class="text-sm text-gray-500">{{ $u->created_at->format('d/m/Y') }}</td>
                         <td>
-                            <a href="{{ route('usuarios.edit', $u) }}" class="btn btn-sm btn-primary">Editar</a>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('usuarios.edit', $u) }}" class="btn btn-sm btn-primary">Editar</a>
+                                @if ($u->id !== auth()->id())
+                                <form method="POST" action="{{ route('usuarios.destroy', $u) }}" class="inline"
+                                    x-data
+                                    x-on:submit.prevent="Swal.fire({
+                                        title: '¿Eliminar usuario?',
+                                        text: 'Se eliminará la cuenta de {{ addslashes($u->name) }}.',
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#dc2626',
+                                        confirmButtonText: 'Sí, eliminar',
+                                        cancelButtonText: 'Cancelar'
+                                    }).then(r => { if (r.isConfirmed) $el.submit(); })">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty
