@@ -30,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
             if ($empresaId = session('empresa_id')) {
                 $empresa = Cache::remember("empresa_{$empresaId}", 600, fn() => Empresa::find($empresaId));
             }
+            if (!$empresa) {
+                $empresa = Cache::remember('empresa_default', 600, fn() => Empresa::first());
+            }
 
             $fechaFormato = $empresa->formato_fecha ?? 'd/m/Y';
             $fechaHoraFormato = $fechaFormato . ' H:i';

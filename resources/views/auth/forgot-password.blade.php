@@ -6,9 +6,9 @@
 <input id="email" type="email" name="email" :value="old('email')" placeholder="tu@correo.com" required autofocus>
 <x-input-error :messages="$errors->get('email')" class="mt-2" />
 </div>
-<button type="submit" class="btn btn-primary btn-block w-full py-3 mt-2">            Enviar enlace de recuperación        </button>
+<button type="submit" class="btn btn-primary btn-block w-full py-3 mt-2" style="background: {{ $empresa->color ?? '#FFD500' }}; color: #000;">            Enviar enlace de recuperación        </button>
 </form>
 <div class="text-center mt-6 text-[13px] text-gray-500">
-<a href="{{ route('login') }}" class="font-semibold" style="color: #E6A000;">Volver al inicio de sesión</a>
+<a href="{{ route('login') }}" class="font-semibold" style="color: {{ $empresa->color_secundario ?? $empresa->color ?? '#E6A000' }};">Volver al inicio de sesión</a>
 </div>
 </x-guest-layout>

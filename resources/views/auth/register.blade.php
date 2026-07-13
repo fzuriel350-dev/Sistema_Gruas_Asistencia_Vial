@@ -37,8 +37,8 @@
 <input id="password_confirmation" type="password" name="password_confirmation" placeholder="••••••••" required autocomplete="new-password">
 <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
 </div>
-<button type="submit" class="btn btn-primary btn-block w-full py-3 mt-2">            Crear cuenta        </button>
+<button type="submit" class="btn btn-primary btn-block w-full py-3 mt-2" style="background: {{ $empresa->color ?? '#FFD500' }}; color: #000;">            Crear cuenta        </button>
 </form>
-<div class="text-center mt-6 text-[13px] text-gray-500">        ¿Ya tienes cuenta? <a href="{{ route('login') }}" class="font-semibold" style="color: #E6A000;">Inicia sesión</a>
+<div class="text-center mt-6 text-[13px] text-gray-500">        ¿Ya tienes cuenta? <a href="{{ route('login') }}" class="font-semibold" style="color: {{ $empresa->color_secundario ?? $empresa->color ?? '#E6A000' }};">Inicia sesión</a>
 </div>
 </x-guest-layout>
